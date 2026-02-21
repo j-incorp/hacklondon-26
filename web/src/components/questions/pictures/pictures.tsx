@@ -23,23 +23,32 @@ const Pictures = ({ className }: PicturesProps): ReactElement => {
           title="5 building"
           description="Take a picture of 5 buildings in the same scene."
           icon={<Building2 className="size-8" />}
+          type="five-buildings"
         />
         <Picture
           title="Tallest building"
           description="Take a picture of the tallest building visible from the station."
           icon={<Building className="size-8" />}
+          type="tallest-building"
         />
         <Picture
           title="Train station"
           description="Take a picture of the train station"
           icon={<RailSymbol className="size-8" />}
+          type="train-station"
         />
         <Picture
           title="Largest body of water"
           description="Take a picture of the largest body of water"
           icon={<Waves className="size-8" />}
+          type="body-of-water"
         />
-        <Picture title="The sky" description="Take a picture of the sky" icon={<CloudSun className="size-8" />} />
+        <Picture
+          title="The sky"
+          description="Take a picture of the sky"
+          icon={<CloudSun className="size-8" />}
+          type="sky"
+        />
       </QuestionSelection>
     </div>
   )

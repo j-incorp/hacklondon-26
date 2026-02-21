@@ -1,13 +1,19 @@
 import * as z from 'zod'
 
-const position = z.object({
+const location = z.object({
   latitude: z.number(),
   longitude: z.number(),
   accuracy: z.number(),
 })
 
-type Position = z.infer<typeof position>
+type Location = z.infer<typeof location>
 
-export type { Position }
+const defaultLocation: Location = {
+  latitude: 0,
+  longitude: 0,
+  accuracy: 0,
+}
 
-export { position }
+export type { Location }
+
+export { defaultLocation, location }

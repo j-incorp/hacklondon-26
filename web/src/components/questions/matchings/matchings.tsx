@@ -23,16 +23,19 @@ const Matchings = ({ className }: MatchingsProps): ReactElement => {
           title="Same tube line"
           description="Is the hider on the same tube line as you?"
           icon={<TrainFrontTunnel className="size-8" />}
+          type="tube-line"
         />
         <Matching
           title="Same London borough"
           description="Is the hider in the same London borough as you?"
           icon={<House className="size-8" />}
+          type="london-borough"
         />
         <Matching
           title="Same London zone"
           description="Is the hider in the same London zone as you?"
           icon={<TrainTrack className="size-8" />}
+          type="london-zone"
         />
       </QuestionSelection>
     </div>

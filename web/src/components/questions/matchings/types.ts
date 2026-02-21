@@ -1,18 +1,26 @@
 import * as z from 'zod'
 
-import { position } from '@/components/types'
+import { location } from '@/components/types'
 
 const matchingsType = z.literal(['london-zone', 'london-borough', 'tube-line', 'train-station', 'sky'])
 
+type MatchingType = z.infer<typeof matchingsType>
+
 const matchingResponseSchema = z.object({
-  position,
+  position: location,
   matchingType: z.string(),
   hit: z.boolean(),
 })
 
-type MatchingType = z.infer<typeof matchingsType>
 type MatchingResponseSchema = z.infer<typeof matchingResponseSchema>
 
-export type { MatchingResponseSchema, MatchingType }
+const matchingRequestSchema = z.object({
+  position: location,
+  matchingType: z.string(),
+})
 
-export { matchingResponseSchema, matchingsType }
+type MatchingRequestSchema = z.infer<typeof matchingRequestSchema>
+
+export type { MatchingRequestSchema, MatchingResponseSchema, MatchingType }
+
+export { matchingRequestSchema, matchingResponseSchema, matchingsType }
