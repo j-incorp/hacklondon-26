@@ -9,6 +9,7 @@ const useLocalStorage = <T>(key: string, initialValue: T) => {
 
     try {
       const item = window.localStorage.getItem(key)
+
       return item ? (JSON.parse(item) as T) : initialValue
     } catch (error) {
       console.warn(`Error reading localStorage key "${key}":`, error)
