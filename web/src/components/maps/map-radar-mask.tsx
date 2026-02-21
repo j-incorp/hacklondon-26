@@ -3,8 +3,10 @@ import difference from '@turf/difference'
 import { featureCollection, polygon } from '@turf/helpers'
 import { type ReactElement } from 'react'
 import { GeoJSON } from 'react-leaflet'
-import { MapCircle } from './map-circle'
+
 import { londonBoundary } from '@/lib/geo-utils'
+
+import { MapCircle } from './map-circle'
 
 interface MapRadarMaskProps {
   center: [number, number] // Joe change to type Position

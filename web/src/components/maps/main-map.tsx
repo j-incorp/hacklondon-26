@@ -1,12 +1,13 @@
+/* eslint-disable no-console */
 import { type Feature, type MultiPolygon, type Polygon } from 'geojson'
 import { type ReactElement } from 'react'
 import { MapContainer, TileLayer } from 'react-leaflet'
 import { GeoJSON } from 'react-leaflet'
-import { MapRadarMask } from '@/components/maps/map-radar-mask'
-import { BoroughMask } from './borough-mask'
 
 import londonMask from '@/components/maps/consts/london-boundary.json'
-import { getLondonBorough, getTubeStopInfo } from '@/lib/geo-utils'
+import { getLondonBorough } from '@/lib/geo-utils'
+
+import { BoroughMask } from './borough-mask'
 
 const hattonCross = [51.46644304791559, -0.4234032595292248]
 
@@ -30,7 +31,7 @@ const MainMap = (): ReactElement => {
         data={londonMask as Feature<Polygon | MultiPolygon>}
         style={{ fillColor: 'black', fillOpacity: 0.5, color: 'transparent' }}
       />
-      <BoroughMask boroughName="Hounslow" borough_success={false} />
+      <BoroughMask boroughName="Hounslow" boroughSuccess={false} />
       {/* <MapRadarMask center={[51.505, -0.09]} radius={10000} radarSuccess={true} /> */}
 
       {/* <MapCircle center={[51.505, -0.09]} radius={10000} /> */}

@@ -1,24 +1,21 @@
-import circle from '@turf/circle'
-import difference from '@turf/difference'
-import { featureCollection, polygon } from '@turf/helpers'
+/* eslint-disable no-console */
 import { type ReactElement } from 'react'
 import { GeoJSON } from 'react-leaflet'
-import { MapCircle } from './map-circle'
-import { getLondonBoroughBoundary, getLondonBoroughBoundaries } from '@/lib/geo-utils'
-import { MapRadarMask } from './map-radar-mask'
-import { union } from '@turf/union'
+
+import { getLondonBoroughBoundaries, getLondonBoroughBoundary } from '@/lib/geo-utils'
+import { isNonEmptyArray } from '@/lib/is/is-non-empty-array'
 
 interface BoroughMaskProps {
   boroughName: string
-  borough_success?: boolean
+  boroughSuccess?: boolean
 }
 
 const boroughBoundary = getLondonBoroughBoundary('Hammersmith and Fulham')
 
 console.log('Borough Boundary:', boroughBoundary)
 
-const BoroughMask = ({ boroughName, borough_success }: BoroughMaskProps): ReactElement => {
-  if (borough_success) {
+const BoroughMask = ({ boroughName, boroughSuccess }: BoroughMaskProps): ReactElement => {
+  if (boroughSuccess) {
     const boroughBoundary = getLondonBoroughBoundary(boroughName)
 
     const mask = boroughBoundary?.geometry
@@ -42,13 +39,19 @@ const BoroughMask = ({ boroughName, borough_success }: BoroughMaskProps): ReactE
       return <div className="mapRadarMask">Mask Failed</div>
     }
 
-    return boroughBoundaries.map((boundary, index) => (
-      <GeoJSON
-        key={`${boroughName}-mask-${index}`}
-        data={boundary}
-        style={{ fillColor: 'black', fillOpacity: 0.5, color: 'black' }}
-      />
-    ))
+    return (
+      <div>
+        {isNonEmptyArray(boroughBoundaries)
+          ? boroughBoundaries.map((boundary, index) => (
+              <GeoJSON
+                key={`${boroughName}-mask-${index}`}
+                data={boundary}
+                style={{ fillColor: 'black', fillOpacity: 0.5, color: 'black' }}
+              />
+            ))
+          : undefined}
+      </div>
+    )
   }
 }
 

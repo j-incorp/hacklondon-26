@@ -1,9 +1,10 @@
+/* eslint-disable no-console */
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon'
 import { featureCollection, point } from '@turf/helpers'
 import union from '@turf/union'
 import { type Feature, type MultiPolygon, type Polygon } from 'geojson'
 
-import boroughsData from '@/components/maps/consts/london-boroughs.json' assert { type: 'json' }
+import boroughsData from '@/components/maps/consts/london-boroughs.json'
 
 const fetchLondonBoundary = async (): Promise<Feature<Polygon | MultiPolygon> | null> => {
   const response = await fetch(
@@ -32,10 +33,10 @@ const getLondonBorough = (lat: number, lng: number): string | null => {
   return match ? match.properties?.name || null : null
 }
 
-const getLondonBoroughBoundary = (boroughName: string): Feature<Polygon | MultiPolygon> | null => {
+const getLondonBoroughBoundary = (boroughName: string): Feature<Polygon | MultiPolygon> | undefined => {
   const match = boroughsData.features.find((feature) => feature.properties?.name === boroughName)
 
-  return match || null
+  return match
 }
 // Get all borough boundaries appart from the one we want to mask out, then union them together to create a single mask geometry
 const getLondonBoroughBoundaries = (boroughName: string): Feature<Polygon | MultiPolygon>[] => {
@@ -114,10 +115,10 @@ const londonBoundary: Feature<Polygon | MultiPolygon> | null = (
 
 export {
   fetchLondonBoundary,
-  getLondonBorough,
-  getTubeStopInfo,
   getLocationInfo,
-  londonBoundary,
-  getLondonBoroughBoundary,
+  getLondonBorough,
   getLondonBoroughBoundaries,
+  getLondonBoroughBoundary,
+  getTubeStopInfo,
+  londonBoundary,
 }
