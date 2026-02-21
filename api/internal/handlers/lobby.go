@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"hacklondon26/internal/game"
+	"log/slog"
 	"math/rand"
 	"net/http"
 	"strings"
@@ -36,23 +37,17 @@ func (s *LobbyStore) CreateLobby() string {
 	for {
 		code := generateCode()
 		if _, ok := s.lobbies[code]; !ok {
-			l := &game.Lobby{}
+			l := game.NewLobby()
 			s.lobbies[code] = l
 			return code
 		}
 	}
 }
 
-func (s *LobbyStore) Exists(code string) bool {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	_, ok := s.lobbies[code]
-	return ok
-}
-
 // CreateLobby creates a new lobby and returns its 4-letter code.
 func CreateLobby(c *gin.Context) {
 	code := store.CreateLobby()
+	slog.Debug("Lobby created", "code", code)
 	c.JSON(http.StatusCreated, gin.H{"code": code})
 }
 
@@ -63,15 +58,24 @@ func JoinLobby(c *gin.Context) {
 
 	// Check lobby code is a valid format
 	if len(code) != 4 {
+		slog.Debug("Invalid lobby code", "code", code)
 		c.Status(http.StatusBadRequest)
 		return
 	}
 
-	if store.Exists(code) {
-		c.JSON(http.StatusOK, gin.H{"code": code})
+	lobby, exists := store.lobbies[code]
+	if !exists {
+		slog.Debug("Lobby not found", "code", code)
+		c.Status(http.StatusNotFound)
 		return
 	}
 
-	// Lobby not found
-	c.Status(http.StatusNotFound)
+	if err := lobby.AddPlayer(game.NewPlayer("Player")); err != nil {
+		slog.Debug("Lobby is full", "code", code)
+		c.Status(http.StatusConflict)
+		return
+	}
+
+	slog.Debug("Player joined lobby", "code", code, "name", "Player")
+	c.Status(http.StatusOK)
 }
