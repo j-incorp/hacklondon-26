@@ -83,7 +83,7 @@ func JoinLobby(c *gin.Context) {
 	player := game.NewPlayer("Player", wsConn)
 	if err := lobby.AddPlayer(player); err != nil {
 		slog.Debug("Lobby is full", "code", code)
-		c.Status(http.StatusConflict)
+		player.Disconnect()
 		return
 	}
 

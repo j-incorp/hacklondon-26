@@ -13,3 +13,16 @@ var SimpleUpgrader = websocket.Upgrader{
 		return true // Allow all origins for simplicity, consider restricting in production
 	},
 }
+
+const (
+	MessageTypePlayerJoined   = "PLAYER_JOINED"
+	MessageTypePlayerLeft     = "PLAYER_LEFT"
+	MessageTypeStartGame      = "START_GAME"
+	MessageTypePlayerPosition = "PLAYER_POSITION"
+	MessageTypePlayerAction   = "PLAYER_ACTION"
+)
+
+type Message struct {
+	Type string `json:"type"`
+	Data string `json:"data,omitempty"`
+}
