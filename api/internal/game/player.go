@@ -14,13 +14,14 @@ type Player struct {
 	Name           string          `json:"name"`
 	Role           PlayerRole      `json:"role"`
 	Position       Position        `json:"position"`
-	Conn           *websocket.Conn `json:"-"`
-	Send           chan []byte     `json:"-"`
-	Recv           chan []byte     `json:"-"`
-	mu             sync.Mutex
-	connected      bool
-	stopCh         chan struct{}
-	disconnectOnce sync.Once
+	Conn            *websocket.Conn `json:"-"`
+	Send            chan []byte     `json:"-"`
+	Recv            chan []byte     `json:"-"`
+	mu              sync.Mutex
+	connected       bool
+	pendingMessages [][]byte
+	stopCh          chan struct{}
+	disconnectOnce  sync.Once
 }
 
 type Position struct {
@@ -61,6 +62,13 @@ func (p *Player) SetPosition(pos Position) {
 	p.Position = pos
 }
 
+// IsConnected reports whether the player's WebSocket is currently active.
+func (p *Player) IsConnected() bool {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.connected
+}
+
 func (p *Player) Disconnect() {
 	p.Conn.Close()
 }
@@ -93,6 +101,22 @@ func (p *Player) DisconnectFrom(lobby *Lobby) {
 		lobby.sendPlayerList()
 		p.Disconnect()
 	})
+}
+
+// QueueMessage appends a message to the pending queue for delivery on reconnect.
+func (p *Player) QueueMessage(msg []byte) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.pendingMessages = append(p.pendingMessages, msg)
+}
+
+// DrainPendingMessages returns all queued messages and clears the queue.
+func (p *Player) DrainPendingMessages() [][]byte {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	msgs := p.pendingMessages
+	p.pendingMessages = nil
+	return msgs
 }
 
 // PrepareReconnect resets the player's connection state so new goroutines

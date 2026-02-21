@@ -26,6 +26,11 @@ func (l *Lobby) handlePlayerSocket(player *Player, isRejoining bool) {
 		}
 		l.broadcast(msg)
 		l.sendPlayerList()
+	} else {
+		// Flush any messages that were queued while the player was disconnected.
+		for _, queued := range player.DrainPendingMessages() {
+			l.sendToPlayer(player.Id, queued)
+		}
 	}
 
 	// Start handlers for the player's sent and received messages
@@ -93,11 +98,18 @@ func (l *Lobby) sendToPlayer(id string, message []byte) error {
 	return l.sendToPlayerLocked(id, message)
 }
 
-// sendToPlayerLocked sends a message to a specific player.
+// sendToPlayerLocked sends a message to a specific player. If the player is
+// disconnected the message is queued (unless it is a PLAYER_POSITION message).
 // Caller must hold at least l.mu.RLock().
 func (l *Lobby) sendToPlayerLocked(id string, message []byte) error {
 	for _, player := range l.players {
 		if player.Id == id {
+			if !player.IsConnected() {
+				if !isPositionMessage(message) {
+					player.QueueMessage(message)
+				}
+				return nil
+			}
 			select {
 			case player.Send <- message:
 			default:
@@ -117,15 +129,33 @@ func (l *Lobby) broadcast(message []byte) {
 }
 
 // broadcastLocked sends a message to all players with non-blocking sends.
+// Disconnected players have the message queued (except PLAYER_POSITION).
 // Caller must hold at least l.mu.RLock().
 func (l *Lobby) broadcastLocked(message []byte) {
 	for _, player := range l.players {
+		if !player.IsConnected() {
+			if !isPositionMessage(message) {
+				player.QueueMessage(message)
+			}
+			continue
+		}
 		select {
 		case player.Send <- message:
 		default:
 			slog.Warn("Player send buffer full, dropping message", "playerId", player.Id)
 		}
 	}
+}
+
+// isPositionMessage returns true if the raw JSON message has type PLAYER_POSITION.
+func isPositionMessage(msg []byte) bool {
+	var header struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(msg, &header); err != nil {
+		return false
+	}
+	return header.Type == MessageTypePlayerPosition
 }
 
 // sendPlayerList broadcasts the current player list to all players.
