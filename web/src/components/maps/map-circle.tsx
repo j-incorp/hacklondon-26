@@ -7,7 +7,7 @@ interface MapCircleProps {
 }
 
 const MapCircle = ({ center, radius }: MapCircleProps): ReactElement => {
-  return <Circle center={center} pathOptions={{ color: 'red' }} radius={radius} />
+  return <Circle center={center} pathOptions={{ color: 'black' }} radius={radius} />
 }
 
 export { MapCircle }

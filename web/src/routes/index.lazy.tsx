@@ -8,7 +8,7 @@ const Route = createLazyFileRoute('/')({
 function Page() {
   return (
     <div className="p-2">
-      <div className="h-screen">
+      <div className="h-screen w-full">
         {' '}
         {/* or whatever height you want */}
         <MainMap />
