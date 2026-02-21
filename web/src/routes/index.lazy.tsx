@@ -1,4 +1,5 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
+
 import { MainMap } from '../components/maps/main-map'
 const Route = createLazyFileRoute('/')({
   component: Page,

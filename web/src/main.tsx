@@ -1,5 +1,6 @@
 import './styles/global.css'
 import 'leaflet/dist/leaflet.css' // add this line directly here
+
 import { createRouter, RouterProvider } from '@tanstack/react-router'
 import { StrictMode } from 'react'
 import ReactDOM from 'react-dom/client'
