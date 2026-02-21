@@ -8,14 +8,9 @@ import (
 )
 
 // handlePlayerSocket sends initial player/lobby info and starts the send/recv goroutines.
-func (l *Lobby) handlePlayerSocket(player *Player) {
+func (l *Lobby) handlePlayerSocket(player *Player, isRejoining bool) {
 	// Send the player information about themselves
-	pData, err := json.Marshal(player)
-	if err != nil {
-		slog.Error("Failed to marshal player data", "playerId", player.Id, "error", err)
-		return
-	}
-	msg, err := json.Marshal(Message{Type: MessageTypePlayerInfo, Data: string(pData)})
+	msg, err := json.Marshal(OutgoingMessage{Type: MessageTypePlayerInfo, Data: PlayerInfoMessage{Id: player.Id, Name: player.Name}})
 	if err != nil {
 		slog.Error("Failed to marshal player info message", "playerId", player.Id, "error", err)
 		return
@@ -23,13 +18,15 @@ func (l *Lobby) handlePlayerSocket(player *Player) {
 	l.sendToPlayer(player.Id, msg)
 
 	// Broadcast the global join event and lobby state
-	msg, err = json.Marshal(Message{Type: MessageTypePlayerJoined, Data: player.Id})
-	if err != nil {
-		slog.Error("Failed to marshal player joined message", "playerId", player.Id, "error", err)
-		return
+	if !isRejoining {
+		msg, err = json.Marshal(OutgoingMessage{Type: MessageTypePlayerJoined, Data: PlayerJoinedMessage{player.Id}})
+		if err != nil {
+			slog.Error("Failed to marshal player joined message", "playerId", player.Id, "error", err)
+			return
+		}
+		l.broadcast(msg)
+		l.sendPlayerList()
 	}
-	l.broadcast(msg)
-	l.sendPlayerList()
 
 	// Start handlers for the player's sent and received messages
 	go l.handlePlayerSocketRecv(player)
@@ -133,13 +130,8 @@ func (l *Lobby) broadcastLocked(message []byte) {
 // sendPlayerList broadcasts the current player list to all players.
 func (l *Lobby) sendPlayerList() {
 	l.mu.RLock()
-	pList, err := json.Marshal(l.players)
-	l.mu.RUnlock()
-	if err != nil {
-		slog.Error("Failed to marshal player list", "error", err)
-		return
-	}
-	msg, err := json.Marshal(Message{Type: MessageTypePlayerListUpdate, Data: string(pList)})
+	defer l.mu.RUnlock()
+	msg, err := json.Marshal(OutgoingMessage{Type: MessageTypePlayerListUpdate, Data: PlayerListUpdateMessage{Players: l.players}})
 	if err != nil {
 		slog.Error("Failed to marshal player list message", "error", err)
 		return

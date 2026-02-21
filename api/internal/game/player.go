@@ -12,6 +12,8 @@ import (
 type Player struct {
 	Id             string          `json:"id"`
 	Name           string          `json:"name"`
+	Role           PlayerRole      `json:"role"`
+	Position       Position        `json:"position"`
 	Conn           *websocket.Conn `json:"-"`
 	Send           chan []byte     `json:"-"`
 	Recv           chan []byte     `json:"-"`
@@ -19,6 +21,18 @@ type Player struct {
 	stopCh         chan struct{}
 	disconnectOnce sync.Once
 }
+
+type Position struct {
+	Lat  float64 `json:"lat"`
+	Long float64 `json:"long"`
+}
+
+type PlayerRole string
+
+var (
+	PlayerRoleHider  PlayerRole = "hider"
+	PlayerRoleSeeker PlayerRole = "seeker"
+)
 
 func NewPlayer(name string, conn *websocket.Conn) *Player {
 	return &Player{
@@ -52,7 +66,7 @@ func (p *Player) DisconnectFrom(lobby *Lobby) {
 		if err != nil {
 			slog.Error("Failed to remove player from lobby", "playerId", p.Id, "error", err)
 		}
-		msg, err := json.Marshal(Message{Type: MessageTypePlayerLeft, Data: p.Id})
+		msg, err := json.Marshal(OutgoingMessage{Type: MessageTypePlayerLeft, Data: PlayerLeftMessage{p.Id}})
 		if err != nil {
 			slog.Error("Failed to marshal player left message", "playerId", p.Id, "error", err)
 			p.Disconnect()

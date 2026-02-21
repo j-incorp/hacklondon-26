@@ -43,7 +43,7 @@ func (l *Lobby) AddPlayer(p *Player) error {
 	defer l.mu.Unlock()
 	if len(l.players) < MaxPlayers {
 		l.players = append(l.players, p)
-		go l.handlePlayerSocket(p)
+		go l.handlePlayerSocket(p, false)
 		return nil
 	}
 	return ErrLobbyFull
@@ -101,7 +101,7 @@ func (l *Lobby) ReconnectPlayer(id string, wsConn *websocket.Conn) error {
 		if p.Id == id && !p.connected {
 			slog.Debug("Player reconnecting to lobby", "playerId", id)
 			p.PrepareReconnect(wsConn)
-			go l.handlePlayerSocket(p)
+			go l.handlePlayerSocket(p, true)
 			return nil
 		}
 	}

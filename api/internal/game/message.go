@@ -1,5 +1,7 @@
 package game
 
+import "encoding/json"
+
 const (
 	MessageTypePlayerInfo       = "PLAYER_INFO"
 	MessageTypePlayerJoined     = "PLAYER_JOINED"
@@ -11,7 +13,44 @@ const (
 )
 
 // Message represents a WebSocket message exchanged between server and client.
-type Message struct {
+type IncomingMessage struct {
+	Type string          `json:"type"`
+	Data json.RawMessage `json:"data,omitempty"`
+}
+
+type OutgoingMessage struct {
 	Type string `json:"type"`
-	Data string `json:"data,omitempty"`
+	Data any    `json:"data,omitempty"`
+}
+
+type PlayerInfoMessage struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+	Role string `json:"role"`
+}
+
+type GameStateChangeMessage struct {
+	State string `json:"state"`
+}
+
+type PlayerPositionMessage struct {
+	Lat  float64 `json:"lat"`
+	Long float64 `json:"long"`
+}
+
+type PlayerActionMessage struct {
+	Action string `json:"action"`
+	Data   any    `json:"data,omitempty"`
+}
+
+type PlayerListUpdateMessage struct {
+	Players []*Player `json:"players"`
+}
+
+type PlayerJoinedMessage struct {
+	PlayerId string `json:"playerId"`
+}
+
+type PlayerLeftMessage struct {
+	PlayerId string `json:"playerId"`
 }

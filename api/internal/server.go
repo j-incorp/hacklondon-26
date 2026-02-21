@@ -13,6 +13,10 @@ import (
 
 func Start() {
 	common.InitLogger()
+	var env handlers.Environment
+	common.LoadEnvironment(&env)
+	server := &handlers.Server{Env: env}
+
 	slog.Info("Starting server")
 
 	r := gin.Default()
@@ -22,10 +26,10 @@ func Start() {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
 
-	r.POST("/lobby", handlers.CreateLobby)
-	r.GET("/lobby/:code", handlers.JoinLobby)
-	r.POST("/lobby/:code/start", handlers.StartGame)
-	r.GET("/lobby/:code/reconnect", handlers.Reconnect)
+	r.POST("/lobby", server.CreateLobby)
+	r.GET("/lobby/:code", server.JoinLobby)
+	r.POST("/lobby/:code/start", server.StartGame)
+	r.GET("/lobby/:code/reconnect", server.Reconnect)
 
 	if err := r.Run(":8080"); err != nil {
 		slog.Error("server exited", "error", err)

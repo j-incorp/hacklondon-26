@@ -11,7 +11,7 @@ import (
 )
 
 // CreateLobby creates a new lobby and returns its 4-letter code.
-func CreateLobby(c *gin.Context) {
+func (s *Server) CreateLobby(c *gin.Context) {
 	code := store.CreateLobby()
 	slog.Debug("Lobby created", "code", code)
 	c.JSON(http.StatusCreated, gin.H{"code": code})
@@ -19,7 +19,7 @@ func CreateLobby(c *gin.Context) {
 
 // JoinLobby upgrades the connection to a WebSocket and adds the player to the lobby.
 // Expected route: GET /lobby/:code
-func JoinLobby(c *gin.Context) {
+func (s *Server) JoinLobby(c *gin.Context) {
 	code := strings.ToUpper(c.Param("code"))
 
 	if len(code) != 4 {
@@ -53,7 +53,7 @@ func JoinLobby(c *gin.Context) {
 }
 
 // StartGame transitions the lobby into the active game state.
-func StartGame(c *gin.Context) {
+func (s *Server) StartGame(c *gin.Context) {
 	code := strings.ToUpper(c.Param("code"))
 
 	if len(code) != 4 {
@@ -80,7 +80,7 @@ func StartGame(c *gin.Context) {
 }
 
 // Reconnect upgrades to a WebSocket and re-establishes a disconnected player's session.
-func Reconnect(c *gin.Context) {
+func (s *Server) Reconnect(c *gin.Context) {
 	code := strings.ToUpper(c.Param("code"))
 
 	if len(code) != 4 {
