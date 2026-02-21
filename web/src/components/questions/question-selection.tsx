@@ -5,7 +5,7 @@ interface QuestionSelectionProps {
 }
 
 const QuestionSelection = ({ children }: QuestionSelectionProps) => {
-  return <div className="grid grid-cols-3 gap-2">{children}</div>
+  return <div className="grid grid-cols-3 place-items-center gap-2">{children}</div>
 }
 
 export { QuestionSelection }

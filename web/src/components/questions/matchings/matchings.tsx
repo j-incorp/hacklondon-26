@@ -15,11 +15,13 @@ const Matchings = ({ className }: MatchingsProps): ReactElement => {
         <Scale className="size-12 text-sky-700" />
         <div>
           <h3>Matchings</h3>
-          <p>Draw 2, pick 1</p>
+          <p>Draw 3, pick 1</p>
         </div>
       </div>
       <QuestionSelection>
         <Matching text="Same tube line" />
+        <Matching text="Same London borough" />
+        <Matching text="Same London zone" />
       </QuestionSelection>
     </div>
   )

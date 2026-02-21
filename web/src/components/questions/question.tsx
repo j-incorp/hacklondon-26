@@ -2,15 +2,21 @@ import type { ReactElement, TouchEvent } from 'react'
 import { useMemo, useRef, useState } from 'react'
 
 import { Matchings } from './matchings/matchings'
+import { Pictures } from './pictures/pictures'
 import { Radars } from './radars/radars'
 
 const Questions = (): ReactElement => {
   const questions = useMemo(
-    () => [<Matchings className="h-100" key="matchings" />, <Radars className="h-100" key="radars" />],
+    () => [
+      <Matchings className="h-100" key="matchings" />,
+      <Radars className="h-100" key="radars" />,
+      <Pictures className="h-100" key="pictures" />,
+    ],
     [],
   )
 
   const [activeIndex, setActiveIndex] = useState(0)
+
   const [direction, setDirection] = useState<'next' | 'prev'>('next')
 
   const touch = useRef<number | null>(null)
