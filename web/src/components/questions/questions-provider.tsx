@@ -2,12 +2,13 @@ import { useStore } from '@tanstack/react-store'
 import { createContext, type ReactNode } from 'react'
 
 import { questionStore } from './question-store'
-import type { Question, QuestionData } from './types'
+import type { Question, QuestionData, QuestionResponse } from './types'
 
 interface QuestionsContextValue {
   getData: () => QuestionData
   setData: (data: QuestionData) => void
   askQuestion: (data: Question) => void
+  addQuestionResponse: (response: QuestionResponse) => void
   hasQuestionBeenAsked: (question: Question) => boolean
 }
 
@@ -15,6 +16,7 @@ const initialState: QuestionsContextValue = {
   getData: () => ({}) as QuestionData,
   setData: () => void 0,
   askQuestion: () => void 0,
+  addQuestionResponse: () => void 0,
   hasQuestionBeenAsked: () => false,
 }
 
@@ -45,6 +47,13 @@ const QuestionsProvider = ({ children, ...props }: QuestionsProviderProps) => {
     }))
   }
 
+  const addQuestionResponse = (response: QuestionResponse) => {
+    questionStore.setState((prev) => ({
+      ...prev,
+      responses: [...prev.responses, response],
+    }))
+  }
+
   const hasQuestionBeenAsked = (question: Question) => {
     return store.asked.some((askedQuestion) => {
       if (askedQuestion.type === 'radar' && question.type === 'radar') {
@@ -67,6 +76,7 @@ const QuestionsProvider = ({ children, ...props }: QuestionsProviderProps) => {
     getData: getData,
     setData: setData,
     askQuestion: askQuestion,
+    addQuestionResponse: addQuestionResponse,
     hasQuestionBeenAsked: hasQuestionBeenAsked,
   }
 
