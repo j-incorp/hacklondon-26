@@ -10,7 +10,7 @@ import tseslint from 'typescript-eslint'
 export default defineConfig([
   tseslint.configs.strict,
   tseslint.configs.stylistic,
-  { ignores: ['dist', 'coverage'] },
+  { ignores: ['dist', 'coverage', 'dev-dist'] },
   {
     files: ['**/*.{ts,tsx}'],
     languageOptions: {
