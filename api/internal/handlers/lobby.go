@@ -40,9 +40,19 @@ func (s *LobbyStore) CreateLobby() string {
 		if _, ok := s.lobbies[code]; !ok {
 			l := game.NewLobby()
 			s.lobbies[code] = l
+			go s.watchLobby(code, l)
 			return code
 		}
 	}
+}
+
+// watchLobby waits for a lobby to signal done and removes it from the store.
+func (s *LobbyStore) watchLobby(code string, l *game.Lobby) {
+	<-l.Done()
+	s.mu.Lock()
+	delete(s.lobbies, code)
+	s.mu.Unlock()
+	slog.Debug("Lobby cleaned up", "code", code)
 }
 
 // CreateLobby creates a new lobby and returns its 4-letter code.
