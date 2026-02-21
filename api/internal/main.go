@@ -25,6 +25,7 @@ func Start() {
 	r.POST("/lobby", handlers.CreateLobby)
 	r.GET("/lobby/:code", handlers.JoinLobby)
 	r.POST("/lobby/:code/start", handlers.StartGame)
+	r.GET("/lobby/:code/reconnect", handlers.Reconnect)
 
 	if err := r.Run(":8080"); err != nil {
 		slog.Error("server exited", "error", err)

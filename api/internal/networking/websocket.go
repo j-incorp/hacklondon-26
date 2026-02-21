@@ -15,6 +15,7 @@ var SimpleUpgrader = websocket.Upgrader{
 }
 
 const (
+	MessageTypePlayerInfo       = "PLAYER_INFO"
 	MessageTypePlayerJoined     = "PLAYER_JOINED"
 	MessageTypePlayerLeft       = "PLAYER_LEFT"
 	MessageTypeGameStateChange  = "GAME_STATE_CHANGE"

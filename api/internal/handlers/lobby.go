@@ -15,7 +15,7 @@ import (
 var letters = []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 type LobbyStore struct {
-	mu      sync.Mutex
+	mu      sync.RWMutex
 	lobbies map[string]*game.Lobby
 }
 
@@ -64,9 +64,9 @@ func JoinLobby(c *gin.Context) {
 		return
 	}
 
-	store.mu.Lock()
+	store.mu.RLock()
 	lobby, exists := store.lobbies[code]
-	store.mu.Unlock()
+	store.mu.RUnlock()
 	if !exists {
 		slog.Debug("Lobby not found", "code", code)
 		c.Status(http.StatusNotFound)
@@ -100,9 +100,9 @@ func StartGame(c *gin.Context) {
 		return
 	}
 
-	store.mu.Lock()
+	store.mu.RLock()
 	lobby, exists := store.lobbies[code]
-	store.mu.Unlock()
+	store.mu.RUnlock()
 	if !exists {
 		slog.Debug("Lobby not found", "code", code)
 		c.Status(http.StatusNotFound)
@@ -113,6 +113,43 @@ func StartGame(c *gin.Context) {
 	if err != nil {
 		slog.Debug("Game is not ready to start", "code", code)
 		c.Status(http.StatusConflict)
+		return
+	}
+
+	c.Status(http.StatusOK)
+}
+
+func Reconnect(c *gin.Context) {
+	code := strings.ToUpper(c.Param("code"))
+
+	// Check lobby code is a valid format
+	if len(code) != 4 {
+		slog.Debug("Invalid lobby code", "code", code)
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
+	store.mu.RLock()
+	lobby, exists := store.lobbies[code]
+	store.mu.RUnlock()
+	if !exists {
+		slog.Debug("Lobby not found", "code", code)
+		c.Status(http.StatusNotFound)
+		return
+	}
+
+	wsConn, err := networking.SimpleUpgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		slog.Error("Failed to upgrade to WebSocket", "error", err)
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	err = lobby.ReconnectPlayer(c.Query("id"), wsConn)
+	if err != nil {
+		slog.Debug("Failed to reconnect player", "code", code, "error", err, "id", c.Query("id"))
+		c.Status(http.StatusInternalServerError)
+		wsConn.Close()
 		return
 	}
 

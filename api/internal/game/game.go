@@ -70,14 +70,29 @@ func (l *Lobby) LeaveLobby(id string) error {
 func (l *Lobby) StartGame() error {
 	if len(l.players) == MaxPlayers {
 		slog.Info("Lobby is starting game")
-		msg, _ := json.Marshal(networking.Message{Type: networking.MessageTypeGameStateChange, Data: strconv.Itoa(int(Hiding))})
-		l.broadcast(msg)
+		l.changeGameState(Hiding)
 		go l.handleGameLoop()
 	} else {
 		return ErrNotEnoughPlayers
 	}
 
 	return nil
+}
+
+func (l *Lobby) ReconnectPlayer(id string, wsConn *websocket.Conn) error {
+	l.mu.RLock()
+	defer l.mu.RUnlock()
+	for _, p := range l.players {
+		if p.Id == id && !p.connected {
+			// Re-establish the connection
+			slog.Debug("Player reconnecting to lobby", "playerId", id)
+			p.Conn = wsConn
+			p.connected = true
+			go l.handlePlayerSocket(p)
+			return nil
+		}
+	}
+	return ErrPlayerNotFound
 }
 
 func (l *Lobby) handleGameLoop() {
@@ -110,6 +125,7 @@ func (l *Lobby) sendToPlayer(id string, message []byte) error {
 func (l *Lobby) changeGameState(state GameState) {
 	msg, _ := json.Marshal(networking.Message{Type: networking.MessageTypeGameStateChange, Data: strconv.Itoa(int(state))})
 	l.broadcast(msg)
+	l.gameState = state
 }
 
 func (l *Lobby) broadcast(message []byte) {
@@ -121,11 +137,23 @@ func (l *Lobby) broadcast(message []byte) {
 }
 
 func (l *Lobby) handlePlayerSocket(player *Player) {
-	msg, _ := json.Marshal(networking.Message{Type: networking.MessageTypePlayerJoined, Data: player.Id})
+	// Send the player information about themselves
+	pData, _ := json.Marshal(player)
+	msg, _ := json.Marshal(networking.Message{Type: networking.MessageTypePlayerInfo, Data: string(pData)})
+	l.sendToPlayer(player.Id, msg)
+	// Broadcast the global join event and lobby state
+	msg, _ = json.Marshal(networking.Message{Type: networking.MessageTypePlayerJoined, Data: player.Id})
 	l.broadcast(msg)
 	l.sendPlayerList()
+	// Start handlers for the player's sent and received messages
 	go l.handlePlayerSocketRecv(player)
 	go l.handlePlayerSocketSend(player)
+}
+
+func (l *Lobby) sendPlayerList() {
+	pList, _ := json.Marshal(l.players)
+	msg, _ := json.Marshal(networking.Message{Type: networking.MessageTypePlayerListUpdate, Data: string(pList)})
+	l.broadcast(msg)
 }
 
 // Loop to handle incoming player messages
@@ -146,16 +174,16 @@ func (l *Lobby) handlePlayerSocketSend(player *Player) {
 	defer player.DisconnectFrom(l)
 
 	for msg := range player.Send {
-		err := player.Conn.WriteMessage(websocket.TextMessage, msg)
-		if err != nil {
-			slog.Warn("Failed to send message to player", "playerId", player.Id, "error", err)
-			return
+		if player.connected {
+			err := player.Conn.WriteMessage(websocket.TextMessage, msg)
+			if err != nil {
+				slog.Warn("Failed to send message to player", "playerId", player.Id, "error", err)
+				return
+			}
+		} else {
+			// Player is not connected
+			// TODO: queue messages to be sent later
+			slog.Debug("Player is not connected, skipping send", "playerId", player.Id)
 		}
 	}
-}
-
-func (l *Lobby) sendPlayerList() {
-	pList, _ := json.Marshal(l.players)
-	msg, _ := json.Marshal(networking.Message{Type: networking.MessageTypePlayerListUpdate, Data: string(pList)})
-	l.broadcast(msg)
 }
