@@ -3,16 +3,18 @@ package game
 import (
 	"log/slog"
 	"sync"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
 
 // Lobby manages the players in a game session and coordinates game lifecycle.
 type Lobby struct {
-	mu        sync.RWMutex
-	players   []*Player
-	gameState GameState
-	done      chan struct{} // closed when the lobby is finished, for cleanup
+	mu           sync.RWMutex
+	players      []*Player
+	gameState    GameState
+	seekingBegan time.Time
+	done         chan struct{} // closed when the lobby is finished, for cleanup
 }
 
 // NewLobby creates a lobby in the WaitingForPlayers state.

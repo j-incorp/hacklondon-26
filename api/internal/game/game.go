@@ -5,9 +5,13 @@ import (
 	"errors"
 	"log/slog"
 	"strconv"
+	"time"
 )
 
 const MaxPlayers = 2
+
+// TODO: set to something reasonable for the game
+const HidingTime = 5 * time.Second
 
 var (
 	ErrLobbyFull        = errors.New("lobby is full")
@@ -81,6 +85,7 @@ func (l *Lobby) changeGameState(state GameState) {
 // changeGameStateLocked broadcasts the state change and updates gameState.
 // Caller must hold l.mu.Lock().
 func (l *Lobby) changeGameStateLocked(state GameState) {
+	// Broadcast the new game state
 	msg, err := json.Marshal(Message{Type: MessageTypeGameStateChange, Data: strconv.Itoa(int(state))})
 	if err != nil {
 		slog.Error("Failed to marshal game state change", "error", err)
@@ -88,4 +93,19 @@ func (l *Lobby) changeGameStateLocked(state GameState) {
 	}
 	l.broadcastLocked(msg)
 	l.gameState = state
+	// If the state has a setup function, call it
+	switch state {
+	case Hiding:
+		go func() {
+			slog.Debug("Beginning Hiding phase timer", "duration", HidingTime)
+			time.Sleep(HidingTime)
+			slog.Debug("Hiding timer has elapsed")
+			l.changeGameState(Seeking)
+		}()
+	case Seeking:
+		slog.Debug("Seeking phase started")
+		l.seekingBegan = time.Now()
+	case Finished:
+		slog.Debug("Game finished", "seekingDuration", time.Since(l.seekingBegan))
+	}
 }
