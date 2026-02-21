@@ -1,7 +1,9 @@
-import { type ReactElement } from 'react'
+import type { ReactElement } from 'react'
+
+import { Card } from '../card'
 
 const Curse = (): ReactElement => {
-  return <>e</>
+  return <Card cardType="curse"></Card>
 }
 
 export { Curse }
