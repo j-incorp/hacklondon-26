@@ -1,6 +1,8 @@
 import type { ReactElement, TouchEvent } from 'react'
 import { useMemo, useRef, useState } from 'react'
 
+import { isNonEmptyArray } from '@/lib/is/is-non-empty-array'
+
 import { Matchings } from './matchings/matchings'
 import { Pictures } from './pictures/pictures'
 import { Radars } from './radars/radars'
@@ -8,9 +10,9 @@ import { Radars } from './radars/radars'
 const Questions = (): ReactElement => {
   const questions = useMemo(
     () => [
-      <Matchings className="h-100" key="matchings" />,
-      <Radars className="h-100" key="radars" />,
-      <Pictures className="h-100" key="pictures" />,
+      <Matchings className="h-[90%]" key="matchings" />,
+      <Radars className="h-[90%]" key="radars" />,
+      <Pictures className="h-[90%]" key="pictures" />,
     ],
     [],
   )
@@ -68,25 +70,27 @@ const Questions = (): ReactElement => {
   }
 
   return (
-    <div onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+    <div onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} className="flex h-full flex-col">
       <div
         key={activeIndex}
-        className={`flex-1 animate-in fade-in duration-300 ${
+        className={`h-[90%] animate-in fade-in duration-300 ${
           direction === 'next' ? 'slide-in-from-right-6' : 'slide-in-from-left-6'
         }`}
       >
         {questions[activeIndex]}
       </div>
-      <div className="mt-4 flex items-center justify-center gap-2" aria-label="Question progress">
-        {questions.map((_, index) => (
-          <span
-            key={`question-dot-${index}`}
-            className={`h-2 w-2 rounded-full transition-colors ${
-              index === activeIndex ? 'bg-primary' : 'bg-muted-foreground/40'
-            }`}
-            aria-hidden="true"
-          />
-        ))}
+      <div className="flex h-[10%] items-center justify-center gap-2" aria-label="Question progress">
+        {isNonEmptyArray(questions)
+          ? questions.map((_, index) => (
+              <span
+                key={`question-dot-${index}`}
+                className={`h-2 w-2 rounded-full transition-colors ${
+                  index === activeIndex ? 'bg-primary' : 'bg-muted-foreground/40'
+                }`}
+                aria-hidden="true"
+              />
+            ))
+          : undefined}
       </div>
     </div>
   )

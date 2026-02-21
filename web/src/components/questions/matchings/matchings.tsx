@@ -1,4 +1,4 @@
-import { Scale } from 'lucide-react'
+import { House, Scale, TrainFrontTunnel, TrainTrack } from 'lucide-react'
 import { type ReactElement } from 'react'
 
 import { QuestionSelection } from '../question-selection'
@@ -19,9 +19,21 @@ const Matchings = ({ className }: MatchingsProps): ReactElement => {
         </div>
       </div>
       <QuestionSelection>
-        <Matching text="Same tube line" />
-        <Matching text="Same London borough" />
-        <Matching text="Same London zone" />
+        <Matching
+          title="Same tube line"
+          description="Is the hider on the same tube line as you?"
+          icon={<TrainFrontTunnel className="size-8" />}
+        />
+        <Matching
+          title="Same London borough"
+          description="Is the hider in the same London borough as you?"
+          icon={<House className="size-8" />}
+        />
+        <Matching
+          title="Same London zone"
+          description="Is the hider in the same London zone as you?"
+          icon={<TrainTrack className="size-8" />}
+        />
       </QuestionSelection>
     </div>
   )

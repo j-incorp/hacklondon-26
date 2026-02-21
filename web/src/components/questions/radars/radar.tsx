@@ -6,7 +6,7 @@ interface RadarProps {
 
 const Radar = ({ size }: RadarProps): ReactElement => {
   return (
-    <div className="inline-flex size-24 rounded-sm items-center justify-center bg-orange-500 text-lg font-medium text-white">
+    <div className="inline-flex size-20 rounded-sm items-center justify-center bg-orange-500 active:bg-orange-600 text-lg font-medium text-white">
       {size} km
     </div>
   )
