@@ -3,6 +3,7 @@ package internal
 import (
 	"net/http"
 
+	"hacklondon26/internal/handlers"
 	"hacklondon26/internal/pkg/common"
 	"log/slog"
 
@@ -20,6 +21,9 @@ func Start() {
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
+
+	r.POST("/lobby", handlers.CreateLobby)
+	r.POST("/lobby/:code", handlers.JoinLobby)
 
 	if err := r.Run(":8080"); err != nil {
 		slog.Error("server exited", "error", err)
