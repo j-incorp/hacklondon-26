@@ -14,11 +14,17 @@ import {
   DrawerTrigger,
 } from '@/ui/drawer'
 
+import { CardSelection } from '../cards/card-selection'
+import { Curse } from '../cards/curses/curse'
+
+const CARDS_PER_PAGE = 3
+
 const HiderTools = (): ReactElement => {
-  const questions = useMemo(() => [], [])
+  const questions = useMemo(() => [<Curse />, <Curse />, <Curse />, <Curse />], [])
 
-  const [activeIndex, setActiveIndex] = useState(0)
+  const totalPages = Math.ceil(questions.length / CARDS_PER_PAGE)
 
+  const [activePage, setActivePage] = useState(0)
   const [direction, setDirection] = useState<'next' | 'prev'>('next')
 
   const touch = useRef<number | null>(null)
@@ -33,9 +39,7 @@ const HiderTools = (): ReactElement => {
     }
 
     const endX = event.changedTouches[0]?.clientX ?? touch.current
-
     const deltaX = endX - touch.current
-
     const swipeThreshold = 40
 
     if (Math.abs(deltaX) < swipeThreshold) {
@@ -45,29 +49,29 @@ const HiderTools = (): ReactElement => {
     }
 
     if (deltaX < 0) {
-      setActiveIndex((index) => {
-        const nextIndex = Math.min(index + 1, questions.length - 1)
-
-        if (nextIndex !== index) {
+      setActivePage((page) => {
+        const nextPage = Math.min(page + 1, totalPages - 1)
+        if (nextPage !== page) {
           setDirection('next')
         }
-
-        return nextIndex
+        return nextPage
       })
     } else {
-      setActiveIndex((index) => {
-        const prevIndex = Math.max(index - 1, 0)
-
-        if (prevIndex !== index) {
+      setActivePage((page) => {
+        const prevPage = Math.max(page - 1, 0)
+        if (prevPage !== page) {
           setDirection('prev')
         }
-
-        return prevIndex
+        return prevPage
       })
     }
 
     touch.current = null
   }
+
+  const startIndex = activePage * CARDS_PER_PAGE
+
+  const visibleCards = questions.slice(startIndex, startIndex + CARDS_PER_PAGE)
 
   return (
     <Drawer>
@@ -91,26 +95,31 @@ const HiderTools = (): ReactElement => {
           </DrawerDescription>
         </DrawerHeader>
         <div
-          key={activeIndex}
+          key={activePage}
           className={`flex-1 animate-in fade-in duration-300 ${
             direction === 'next' ? 'slide-in-from-right-6' : 'slide-in-from-left-6'
           }`}
         >
-          <div className="w-full justify-center text-center mx-auto">{questions[activeIndex]}</div>
+          <div className="px-4">
+            <CardSelection>
+              {isNonEmptyArray(visibleCards)
+                ? visibleCards.map((card, index) => <div key={`card-${startIndex + index}`}>{card}</div>)
+                : undefined}
+            </CardSelection>
+          </div>
         </div>
         <DrawerFooter className="h-auto">
           <div className="flex items-center justify-center gap-2" aria-label="Question progress">
-            {isNonEmptyArray(questions)
-              ? questions.map((_, index) => (
-                  <span
-                    key={`question-dot-${index}`}
-                    className={`h-2 w-2 rounded-full transition-colors ${
-                      index === activeIndex ? 'bg-primary' : 'bg-muted-foreground/40'
-                    }`}
-                    aria-hidden="true"
-                  />
-                ))
-              : undefined}
+            {isNonEmptyArray(questions) &&
+              Array.from({ length: totalPages }).map((_, index) => (
+                <span
+                  key={`page-dot-${index}`}
+                  className={`h-2 w-2 rounded-full transition-colors ${
+                    index === activePage ? 'bg-primary' : 'bg-muted-foreground/40'
+                  }`}
+                  aria-hidden="true"
+                />
+              ))}
           </div>
         </DrawerFooter>
       </DrawerContent>
