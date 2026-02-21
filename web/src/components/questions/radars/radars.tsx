@@ -24,7 +24,10 @@ const Radars = ({ className }: RadarsProps): ReactElement => {
         <Radar size={1} />
         <Radar size={2} />
         <Radar size={5} />
+        <Radar size={8} />
         <Radar size={10} />
+        <Radar size={12} />
+        <Radar size={15} />
       </QuestionSelection>
     </div>
   )

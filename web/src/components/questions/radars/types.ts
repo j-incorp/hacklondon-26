@@ -1,19 +1,20 @@
 import * as z from 'zod'
 
-import { position } from '../../types'
+import { location } from '../../types'
 
 const radarResponseSchema = z.object({
-  position,
+  position: location,
   radius: z.number(),
   hit: z.boolean(),
 })
 
+type RadarRequestSchema = z.infer<typeof radarRequestSchema>
+
 const radarRequestSchema = z.object({
-  position,
+  position: location,
   radius: z.number(),
 })
 
-type RadarRequestSchema = z.infer<typeof radarRequestSchema>
 type RadarResponseSchema = z.infer<typeof radarResponseSchema>
 
 export type { RadarRequestSchema, RadarResponseSchema }

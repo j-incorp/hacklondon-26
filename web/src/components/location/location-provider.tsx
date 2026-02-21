@@ -1,10 +1,10 @@
 import type { ReactElement, ReactNode } from 'react'
 import { createContext, useEffect, useMemo, useState } from 'react'
 
-import type { Position } from '../types'
+import type { Location } from '../types'
 
 interface LocationProviderState {
-  location?: Position
+  location?: Location
   error?: GeolocationPositionError
   loading?: boolean
 }
@@ -25,7 +25,7 @@ interface LocationProviderProps {
 const geolocationSupported = typeof navigator !== 'undefined' && 'geolocation' in navigator
 
 const LocationProvider = ({ children, options }: LocationProviderProps): ReactElement => {
-  const [location, setLocation] = useState<Position | undefined>(undefined)
+  const [location, setLocation] = useState<Location | undefined>(undefined)
 
   const [error, setError] = useState<GeolocationPositionError | undefined>(() => {
     if (!geolocationSupported) {
