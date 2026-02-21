@@ -11,8 +11,6 @@ import (
 )
 
 type S3Store struct {
-	accessKey  string
-	secretKey  string
 	bucketName string
 
 	presignClient *s3.PresignClient
@@ -28,8 +26,6 @@ func NewS3Store(ctx context.Context, accessKey, secretKey, bucketName string) (*
 	pr := s3.NewPresignClient(cl)
 
 	return &S3Store{
-		accessKey:     accessKey,
-		secretKey:     secretKey,
 		bucketName:    bucketName,
 		presignClient: pr,
 	}, nil

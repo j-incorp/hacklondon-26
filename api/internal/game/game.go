@@ -55,13 +55,13 @@ func (l *Lobby) handleGameLoop() {
 			if !ok {
 				return
 			}
-			slog.Debug("Received message from player", "playerId", p0Id, "message", msg)
+			slog.Debug("Received message from player", "playerId", p0Id)
 			l.HandlePlayerMessage(0, msg)
 		case msg, ok := <-p1Recv:
 			if !ok {
 				return
 			}
-			slog.Debug("Received message from player", "playerId", p1Id, "message", msg)
+			slog.Debug("Received message from player", "playerId", p1Id)
 			l.HandlePlayerMessage(1, msg)
 		case <-l.done:
 			return
@@ -71,7 +71,7 @@ func (l *Lobby) handleGameLoop() {
 
 // HandlePlayerMessage processes a message received from a player during the game.
 func (l *Lobby) HandlePlayerMessage(player int, message []byte) {
-	slog.Debug("Handling player message", "playerId", l.players[player].Id, "message", string(message))
+	slog.Debug("Handling player message", "playerId", l.players[player].Id)
 	var msg IncomingMessage
 	err := json.Unmarshal(message, &msg)
 	if err != nil {
@@ -98,6 +98,58 @@ func (l *Lobby) HandlePlayerMessage(player int, message []byte) {
 			err = l.sendToPlayer(l.players[1-player].Id, posMsg)
 			if err != nil {
 				slog.Error("Failed to send position message to other player", "playerId", l.players[player].Id, "error", err)
+			}
+		}
+	case MessageTypePlayerAction:
+		var actionMsg IncomingPlayerActionMessage
+		err := json.Unmarshal(msg.Data, &actionMsg)
+		if err != nil {
+			slog.Warn("Failed to unmarshal player action message", "playerId", l.players[player].Id, "error", err)
+			return
+		}
+		slog.Debug("Received player action", "playerId", l.players[player].Id, "action", actionMsg.Action)
+		switch actionMsg.Action {
+		case PlayerActionAskQuestion:
+			var questionReq IncomingQuestionRequest
+			err := json.Unmarshal(actionMsg.Data, &questionReq)
+			if err != nil {
+				slog.Warn("Failed to unmarshal question request data", "playerId", l.players[player].Id, "error", err)
+				return
+			}
+			var asker, answerer *Player
+			if l.players[player].Role == PlayerRoleSeeker {
+				asker = l.players[player]
+				answerer = l.players[1-player]
+			} else {
+				slog.Warn("Player attempted to ask question but is not the seeker", "playerId", l.players[player].Id)
+				return
+			}
+			// Call the Ask handler to handle sending the question to the hider if needed
+			err = questionReq.Ask(l, asker, answerer)
+			if err != nil {
+				slog.Error("Failed to handle question request", "playerId", l.players[player].Id, "error", err)
+			}
+		case PlayerActionAnswerQuestion:
+			// For now we only have one question type that requires an answer, so we can handle it directly here.
+			var answer IncomingQuestionResponse
+			err := json.Unmarshal(actionMsg.Data, &answer)
+			if err != nil {
+				slog.Warn("Failed to unmarshal question answer data", "playerId", l.players[player].Id, "error", err)
+				return
+			}
+			slog.Debug("Received question answer", "playerId", l.players[player].Id, "answer", answer)
+			var answerer, asker *Player
+			if l.players[player].Role == PlayerRoleHider {
+				answerer = l.players[player]
+				asker = l.players[1-player]
+			} else {
+				slog.Warn("Player attempted to answer question but is not the hider", "playerId", l.players[player].Id)
+				return
+			}
+			// Call the Answer handler on the question to handle sending data back to the seeker
+			err = answer.Answer(l, answerer, asker)
+			if err != nil {
+				slog.Error("Failed to handle question answer", "playerId", l.players[player].Id, "error", err)
 			}
 		}
 	default:

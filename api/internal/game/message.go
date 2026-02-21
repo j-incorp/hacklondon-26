@@ -12,6 +12,14 @@ const (
 	MessageTypePlayerListUpdate = "PLAYER_LIST_UPDATE"
 )
 
+type PlayerAction string
+
+const (
+	PlayerActionAskQuestion    = "ASK_QUESTION"
+	PlayerActionAnswerQuestion = "ANSWER_QUESTION"
+	PlayerActionVetoQuestion   = "VETO_QUESTION"
+)
+
 // Message represents a WebSocket message exchanged between server and client.
 type IncomingMessage struct {
 	Type string          `json:"type"`
@@ -38,9 +46,14 @@ type PlayerPositionMessage struct {
 	Long float64 `json:"long"`
 }
 
-type PlayerActionMessage struct {
-	Action string `json:"action"`
-	Data   any    `json:"data,omitempty"`
+type IncomingPlayerActionMessage struct {
+	Action PlayerAction    `json:"action"`
+	Data   json.RawMessage `json:"data,omitempty"`
+}
+
+type OutgoingPlayerActionMessage struct {
+	Action PlayerAction `json:"action"`
+	Data   any          `json:"data,omitempty"`
 }
 
 type PlayerListUpdateMessage struct {

@@ -31,8 +31,8 @@ type Position struct {
 type PlayerRole string
 
 var (
-	PlayerRoleHider  PlayerRole = "hider"
-	PlayerRoleSeeker PlayerRole = "seeker"
+	PlayerRoleHider  PlayerRole = "HIDER"
+	PlayerRoleSeeker PlayerRole = "SEEKER"
 )
 
 func NewPlayer(name string, conn *websocket.Conn) *Player {
