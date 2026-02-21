@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"hacklondon26/internal/game"
+	"hacklondon26/internal/networking"
 	"log/slog"
 	"math/rand"
 	"net/http"
@@ -51,8 +52,8 @@ func CreateLobby(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"code": code})
 }
 
-// JoinLobby allows a user to join a lobby by providing the 4-letter code as a URL param.
-// Expected route example: POST /lobbies/:code/join
+// JoinLobby upgrades the connection to a WebSocket and adds the player to the lobby.
+// Expected route: GET /lobby/:code
 func JoinLobby(c *gin.Context) {
 	code := strings.ToUpper(c.Param("code"))
 
@@ -63,19 +64,28 @@ func JoinLobby(c *gin.Context) {
 		return
 	}
 
+	store.mu.Lock()
 	lobby, exists := store.lobbies[code]
+	store.mu.Unlock()
 	if !exists {
 		slog.Debug("Lobby not found", "code", code)
 		c.Status(http.StatusNotFound)
 		return
 	}
 
-	if err := lobby.AddPlayer(game.NewPlayer("Player")); err != nil {
+	wsConn, err := networking.SimpleUpgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		slog.Error("Failed to upgrade to WebSocket", "error", err)
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	player := game.NewPlayer("Player", wsConn)
+	if err := lobby.AddPlayer(player); err != nil {
 		slog.Debug("Lobby is full", "code", code)
 		c.Status(http.StatusConflict)
 		return
 	}
 
-	slog.Debug("Player joined lobby", "code", code, "name", "Player")
 	c.Status(http.StatusOK)
 }

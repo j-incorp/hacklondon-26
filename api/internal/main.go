@@ -23,7 +23,7 @@ func Start() {
 	})
 
 	r.POST("/lobby", handlers.CreateLobby)
-	r.POST("/lobby/:code", handlers.JoinLobby)
+	r.GET("/lobby/:code", handlers.JoinLobby)
 
 	if err := r.Run(":8080"); err != nil {
 		slog.Error("server exited", "error", err)
