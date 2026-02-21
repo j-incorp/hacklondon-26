@@ -2,7 +2,7 @@
 import { type ReactElement } from 'react'
 import { GeoJSON } from 'react-leaflet'
 
-import { getLondonBoroughBoundaries, getLondonBoroughBoundary } from '@/lib/geo-utils'
+import { getLondonBoroughBoundaries, getLondonBoroughBoundary } from '@/lib/geo/geo-utils'
 import { isNonEmptyArray } from '@/lib/is/is-non-empty-array'
 
 interface BoroughMaskProps {

@@ -5,7 +5,7 @@ import { MapContainer, TileLayer } from 'react-leaflet'
 import { GeoJSON } from 'react-leaflet'
 
 import londonMask from '@/components/maps/consts/london-boundary.json'
-import { getLondonBorough } from '@/lib/geo-utils'
+import { getLondonBorough } from '@/lib/geo/geo-utils'
 
 import { BoroughMask } from './borough-mask'
 
