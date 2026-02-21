@@ -107,6 +107,7 @@ func (l *Lobby) broadcast(message []byte) {
 func (l *Lobby) handlePlayerSocket(player *Player) {
 	msg, _ := json.Marshal(networking.Message{Type: networking.MessageTypePlayerJoined, Data: player.Id})
 	l.broadcast(msg)
+	l.sendPlayerList()
 	go l.handlePlayerSocketRecv(player)
 	go l.handlePlayerSocketSend(player)
 }
@@ -135,4 +136,10 @@ func (l *Lobby) handlePlayerSocketSend(player *Player) {
 			return
 		}
 	}
+}
+
+func (l *Lobby) sendPlayerList() {
+	pList, _ := json.Marshal(l.players)
+	msg, _ := json.Marshal(networking.Message{Type: networking.MessageTypePlayerListUpdate, Data: string(pList)})
+	l.broadcast(msg)
 }

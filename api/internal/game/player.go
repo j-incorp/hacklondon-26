@@ -39,4 +39,5 @@ func (p *Player) DisconnectFrom(lobby *Lobby) {
 	p.Disconnect()
 	msg, _ := json.Marshal(networking.Message{Type: networking.MessageTypePlayerLeft, Data: p.Id})
 	lobby.broadcast(msg)
+	lobby.sendPlayerList()
 }

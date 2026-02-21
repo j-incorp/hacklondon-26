@@ -15,11 +15,12 @@ var SimpleUpgrader = websocket.Upgrader{
 }
 
 const (
-	MessageTypePlayerJoined   = "PLAYER_JOINED"
-	MessageTypePlayerLeft     = "PLAYER_LEFT"
-	MessageTypeStartGame      = "START_GAME"
-	MessageTypePlayerPosition = "PLAYER_POSITION"
-	MessageTypePlayerAction   = "PLAYER_ACTION"
+	MessageTypePlayerJoined     = "PLAYER_JOINED"
+	MessageTypePlayerLeft       = "PLAYER_LEFT"
+	MessageTypeStartGame        = "START_GAME"
+	MessageTypePlayerPosition   = "PLAYER_POSITION"
+	MessageTypePlayerAction     = "PLAYER_ACTION"
+	MessageTypePlayerListUpdate = "PLAYER_LIST_UPDATE"
 )
 
 type Message struct {
