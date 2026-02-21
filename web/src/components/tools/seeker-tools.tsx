@@ -102,7 +102,7 @@ const SeekerTools = (): ReactElement => {
         </DrawerHeader>
         <div
           key={activeIndex}
-          className={`flex-1 animate-in fade-in duration-300 ${
+          className={`flex-1 overflow-y-auto animate-in fade-in duration-300 ${
             direction === 'next' ? 'slide-in-from-right-6' : 'slide-in-from-left-6'
           }`}
         >
