@@ -87,7 +87,7 @@ func (l *Lobby) HandlePlayerMessage(player int, message []byte) {
 			slog.Warn("Failed to unmarshal player position", "playerId", l.players[player].Id, "error", err)
 			return
 		}
-		l.players[player].Position = pos
+		l.players[player].SetPosition(pos)
 		// If the other player is the hider, send the position there too
 		if l.players[1-player].Role == PlayerRoleHider {
 			posMsg, err := json.Marshal(OutgoingMessage{Type: MessageTypePlayerPosition, Data: PlayerPositionMessage{pos.Lat, pos.Long}})
@@ -126,6 +126,9 @@ func (l *Lobby) changeGameStateLocked(state GameState) {
 	// If the state has a setup function, call it
 	switch state {
 	case Hiding:
+		// Assign roles: first player hides, second seeks.
+		l.players[0].SetRole(PlayerRoleHider)
+		l.players[1].SetRole(PlayerRoleSeeker)
 		go func() {
 			slog.Debug("Beginning Hiding phase timer", "duration", HidingTime)
 			time.Sleep(HidingTime)

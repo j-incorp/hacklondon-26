@@ -17,6 +17,7 @@ type Player struct {
 	Conn           *websocket.Conn `json:"-"`
 	Send           chan []byte     `json:"-"`
 	Recv           chan []byte     `json:"-"`
+	mu             sync.Mutex
 	connected      bool
 	stopCh         chan struct{}
 	disconnectOnce sync.Once
@@ -46,6 +47,20 @@ func NewPlayer(name string, conn *websocket.Conn) *Player {
 	}
 }
 
+// SetRole assigns the player's role.
+func (p *Player) SetRole(role PlayerRole) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.Role = role
+}
+
+// SetPosition updates the player's geographic position.
+func (p *Player) SetPosition(pos Position) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.Position = pos
+}
+
 func (p *Player) Disconnect() {
 	p.Conn.Close()
 }
@@ -58,7 +73,9 @@ func (p *Player) DisconnectFrom(lobby *Lobby) {
 		if lobby.GetGameState() != WaitingForPlayers {
 			// The player needs to be able to rejoin later if something goes wrong
 			slog.Warn("Player lost connection during game", "playerId", p.Id)
+			p.mu.Lock()
 			p.connected = false
+			p.mu.Unlock()
 			p.Conn.Close()
 			return
 		}
@@ -81,8 +98,10 @@ func (p *Player) DisconnectFrom(lobby *Lobby) {
 // PrepareReconnect resets the player's connection state so new goroutines
 // can operate without racing with old ones.
 func (p *Player) PrepareReconnect(conn *websocket.Conn) {
+	p.mu.Lock()
 	p.Conn = conn
 	p.connected = true
 	p.stopCh = make(chan struct{})
 	p.disconnectOnce = sync.Once{}
+	p.mu.Unlock()
 }

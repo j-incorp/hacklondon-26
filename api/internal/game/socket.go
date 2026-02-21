@@ -38,9 +38,10 @@ func (l *Lobby) handlePlayerSocket(player *Player, isRejoining bool) {
 func (l *Lobby) handlePlayerSocketRecv(player *Player) {
 	defer player.DisconnectFrom(l)
 
-	// Capture the connection for this session so a reconnect replacing
-	// player.Conn doesn't affect this goroutine.
+	// Capture the connection and stop channel for this session so a reconnect
+	// replacing player.Conn or player.stopCh doesn't affect this goroutine.
 	conn := player.Conn
+	stop := player.stopCh
 	for {
 		_, msg, err := conn.ReadMessage()
 		if err != nil {
@@ -49,7 +50,7 @@ func (l *Lobby) handlePlayerSocketRecv(player *Player) {
 		}
 		select {
 		case player.Recv <- msg:
-		case <-player.stopCh:
+		case <-stop:
 			return
 		}
 	}
@@ -136,5 +137,5 @@ func (l *Lobby) sendPlayerList() {
 		slog.Error("Failed to marshal player list message", "error", err)
 		return
 	}
-	l.broadcast(msg)
+	l.broadcastLocked(msg)
 }
