@@ -1,5 +1,6 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
 
+import { LobbyForm } from '@/components/lobby/lobby-form'
 import { Location } from '@/components/location/location'
 import { Tools } from '@/components/tools/tools'
 
@@ -10,6 +11,7 @@ const Page = () => {
       <Tools type="seeker" />
       <Tools type="hider" />
       <Location />
+      <LobbyForm />
     </div>
   )
 }
