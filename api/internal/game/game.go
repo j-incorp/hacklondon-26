@@ -5,6 +5,7 @@ import (
 	"errors"
 	"hacklondon26/internal/networking"
 	"log/slog"
+	"strconv"
 	"sync"
 
 	"github.com/gorilla/websocket"
@@ -18,13 +19,23 @@ var (
 	ErrNotEnoughPlayers = errors.New("not enough players to start the game")
 )
 
+type GameState int
+
+const (
+	WaitingForPlayers GameState = iota
+	Hiding
+	Seeking
+	Finished
+)
+
 type Lobby struct {
-	mu      sync.RWMutex
-	players []*Player
+	mu        sync.RWMutex
+	players   []*Player
+	gameState GameState
 }
 
 func NewLobby() *Lobby {
-	return &Lobby{}
+	return &Lobby{gameState: WaitingForPlayers}
 }
 
 func (l *Lobby) AddPlayer(p *Player) error {
@@ -59,9 +70,9 @@ func (l *Lobby) LeaveLobby(id string) error {
 func (l *Lobby) StartGame() error {
 	if len(l.players) == MaxPlayers {
 		slog.Info("Lobby is starting game")
-		msg, _ := json.Marshal(networking.Message{Type: networking.MessageTypeStartGame})
+		msg, _ := json.Marshal(networking.Message{Type: networking.MessageTypeGameStateChange, Data: strconv.Itoa(int(Hiding))})
 		l.broadcast(msg)
-		l.handleGameLoop()
+		go l.handleGameLoop()
 	} else {
 		return ErrNotEnoughPlayers
 	}
@@ -94,6 +105,11 @@ func (l *Lobby) sendToPlayer(id string, message []byte) error {
 		}
 	}
 	return ErrPlayerNotFound
+}
+
+func (l *Lobby) changeGameState(state GameState) {
+	msg, _ := json.Marshal(networking.Message{Type: networking.MessageTypeGameStateChange, Data: strconv.Itoa(int(state))})
+	l.broadcast(msg)
 }
 
 func (l *Lobby) broadcast(message []byte) {

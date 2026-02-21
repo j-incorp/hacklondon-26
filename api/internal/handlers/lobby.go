@@ -89,3 +89,32 @@ func JoinLobby(c *gin.Context) {
 
 	c.Status(http.StatusOK)
 }
+
+func StartGame(c *gin.Context) {
+	code := strings.ToUpper(c.Param("code"))
+
+	// Check lobby code is a valid format
+	if len(code) != 4 {
+		slog.Debug("Invalid lobby code", "code", code)
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
+	store.mu.Lock()
+	lobby, exists := store.lobbies[code]
+	store.mu.Unlock()
+	if !exists {
+		slog.Debug("Lobby not found", "code", code)
+		c.Status(http.StatusNotFound)
+		return
+	}
+
+	err := lobby.StartGame()
+	if err != nil {
+		slog.Debug("Game is not ready to start", "code", code)
+		c.Status(http.StatusConflict)
+		return
+	}
+
+	c.Status(http.StatusOK)
+}
