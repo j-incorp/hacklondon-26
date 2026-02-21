@@ -16,7 +16,7 @@ type S3Store struct {
 	presignClient *s3.PresignClient
 }
 
-func NewS3Store(ctx context.Context, accessKey, secretKey, bucketName string) (*S3Store, error) {
+func NewS3Store(ctx context.Context, bucketName string) (*S3Store, error) {
 	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
 		return nil, err
