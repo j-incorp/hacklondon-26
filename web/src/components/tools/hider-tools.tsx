@@ -1,4 +1,4 @@
-import { CircleQuestionMark, WalletCards } from 'lucide-react'
+import { Book, WalletCards } from 'lucide-react'
 import type { ReactElement, TouchEvent } from 'react'
 import { useMemo, useRef, useState } from 'react'
 
@@ -76,7 +76,7 @@ const HiderTools = (): ReactElement => {
           size="icon"
           className="rounded-full bg-primary text-white hover:bg-orange-600 focus-visible:ring-orange-400"
         >
-          <CircleQuestionMark className="size-6" />
+          <Book className="size-6" />
         </Button>
       </DrawerTrigger>
       <DrawerContent className="h-[70dvh] flex flex-col" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
