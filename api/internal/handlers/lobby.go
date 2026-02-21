@@ -4,56 +4,11 @@ import (
 	"hacklondon26/internal/game"
 	"hacklondon26/internal/networking"
 	"log/slog"
-	"math/rand"
 	"net/http"
 	"strings"
-	"sync"
 
 	"github.com/gin-gonic/gin"
 )
-
-var letters = []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-
-type LobbyStore struct {
-	mu      sync.RWMutex
-	lobbies map[string]*game.Lobby
-}
-
-var store = &LobbyStore{lobbies: make(map[string]*game.Lobby)}
-
-func generateCode() string {
-	b := make([]rune, 4)
-	for i := range b {
-		b[i] = letters[rand.Intn(len(letters))]
-	}
-	return string(b)
-}
-
-// Create a new empty lobby and return its 4-letter code.
-func (s *LobbyStore) CreateLobby() string {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	// Avoid collisions
-	for {
-		code := generateCode()
-		if _, ok := s.lobbies[code]; !ok {
-			l := game.NewLobby()
-			s.lobbies[code] = l
-			go s.watchLobby(code, l)
-			return code
-		}
-	}
-}
-
-// watchLobby waits for a lobby to signal done and removes it from the store.
-func (s *LobbyStore) watchLobby(code string, l *game.Lobby) {
-	<-l.Done()
-	s.mu.Lock()
-	delete(s.lobbies, code)
-	s.mu.Unlock()
-	slog.Debug("Lobby cleaned up", "code", code)
-}
 
 // CreateLobby creates a new lobby and returns its 4-letter code.
 func CreateLobby(c *gin.Context) {
@@ -67,16 +22,13 @@ func CreateLobby(c *gin.Context) {
 func JoinLobby(c *gin.Context) {
 	code := strings.ToUpper(c.Param("code"))
 
-	// Check lobby code is a valid format
 	if len(code) != 4 {
 		slog.Debug("Invalid lobby code", "code", code)
 		c.Status(http.StatusBadRequest)
 		return
 	}
 
-	store.mu.RLock()
-	lobby, exists := store.lobbies[code]
-	store.mu.RUnlock()
+	lobby, exists := store.GetLobby(code)
 	if !exists {
 		slog.Debug("Lobby not found", "code", code)
 		c.Status(http.StatusNotFound)
@@ -100,19 +52,17 @@ func JoinLobby(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// StartGame transitions the lobby into the active game state.
 func StartGame(c *gin.Context) {
 	code := strings.ToUpper(c.Param("code"))
 
-	// Check lobby code is a valid format
 	if len(code) != 4 {
 		slog.Debug("Invalid lobby code", "code", code)
 		c.Status(http.StatusBadRequest)
 		return
 	}
 
-	store.mu.RLock()
-	lobby, exists := store.lobbies[code]
-	store.mu.RUnlock()
+	lobby, exists := store.GetLobby(code)
 	if !exists {
 		slog.Debug("Lobby not found", "code", code)
 		c.Status(http.StatusNotFound)
@@ -129,19 +79,17 @@ func StartGame(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// Reconnect upgrades to a WebSocket and re-establishes a disconnected player's session.
 func Reconnect(c *gin.Context) {
 	code := strings.ToUpper(c.Param("code"))
 
-	// Check lobby code is a valid format
 	if len(code) != 4 {
 		slog.Debug("Invalid lobby code", "code", code)
 		c.Status(http.StatusBadRequest)
 		return
 	}
 
-	store.mu.RLock()
-	lobby, exists := store.lobbies[code]
-	store.mu.RUnlock()
+	lobby, exists := store.GetLobby(code)
 	if !exists {
 		slog.Debug("Lobby not found", "code", code)
 		c.Status(http.StatusNotFound)

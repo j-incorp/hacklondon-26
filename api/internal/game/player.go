@@ -2,7 +2,6 @@ package game
 
 import (
 	"encoding/json"
-	"hacklondon26/internal/networking"
 	"log/slog"
 	"sync"
 
@@ -53,7 +52,7 @@ func (p *Player) DisconnectFrom(lobby *Lobby) {
 		if err != nil {
 			slog.Error("Failed to remove player from lobby", "playerId", p.Id, "error", err)
 		}
-		msg, err := json.Marshal(networking.Message{Type: networking.MessageTypePlayerLeft, Data: p.Id})
+		msg, err := json.Marshal(Message{Type: MessageTypePlayerLeft, Data: p.Id})
 		if err != nil {
 			slog.Error("Failed to marshal player left message", "playerId", p.Id, "error", err)
 			p.Disconnect()
