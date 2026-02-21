@@ -162,6 +162,10 @@ func isPositionMessage(msg []byte) bool {
 func (l *Lobby) sendPlayerList() {
 	l.mu.RLock()
 	defer l.mu.RUnlock()
+	l.sendPlayerListLocked()
+}
+
+func (l *Lobby) sendPlayerListLocked() {
 	msg, err := json.Marshal(OutgoingMessage{Type: MessageTypePlayerListUpdate, Data: PlayerListUpdateMessage{Players: l.players}})
 	if err != nil {
 		slog.Error("Failed to marshal player list message", "error", err)

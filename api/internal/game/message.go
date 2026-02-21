@@ -7,6 +7,7 @@ const (
 	MessageTypePlayerJoined     = "PLAYER_JOINED"
 	MessageTypePlayerLeft       = "PLAYER_LEFT"
 	MessageTypeGameStateChange  = "GAME_STATE_CHANGE"
+	MessageTypeHidingPhaseStart = "HIDING_PHASE_START"
 	MessageTypePlayerPosition   = "PLAYER_POSITION"
 	MessageTypePlayerAction     = "PLAYER_ACTION"
 	MessageTypePlayerListUpdate = "PLAYER_LIST_UPDATE"
@@ -18,6 +19,7 @@ const (
 	PlayerActionAskQuestion    = "ASK_QUESTION"
 	PlayerActionAnswerQuestion = "ANSWER_QUESTION"
 	PlayerActionVetoQuestion   = "VETO_QUESTION"
+	PlayerActionSendCurse      = "SEND_CURSE"
 )
 
 // Message represents a WebSocket message exchanged between server and client.
@@ -66,4 +68,8 @@ type PlayerJoinedMessage struct {
 
 type PlayerLeftMessage struct {
 	PlayerId string `json:"playerId"`
+}
+
+type OutgoingHidingPhaseStart struct {
+	Duration int `json:"duration"` // seconds until hiding phase ends
 }

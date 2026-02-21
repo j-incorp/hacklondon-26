@@ -151,6 +151,25 @@ func (l *Lobby) HandlePlayerMessage(player int, message []byte) {
 			if err != nil {
 				slog.Error("Failed to handle question answer", "playerId", l.players[player].Id, "error", err)
 			}
+		case PlayerActionSendCurse:
+			var curseReq IncomingCurseRequest
+			err := json.Unmarshal(actionMsg.Data, &curseReq)
+			if err != nil {
+				slog.Warn("Failed to unmarshal curse request data", "playerId", l.players[player].Id, "error", err)
+				return
+			}
+			var sender, receiver *Player
+			if l.players[player].Role == PlayerRoleHider {
+				sender = l.players[player]
+				receiver = l.players[1-player]
+			} else {
+				slog.Warn("Player attempted to send curse but is not the hider", "playerId", l.players[player].Id)
+				return
+			}
+			err = curseReq.SendCurse(l, sender, receiver)
+			if err != nil {
+				slog.Error("Failed to handle curse request", "playerId", l.players[player].Id, "error", err)
+			}
 		}
 	default:
 		slog.Warn("Received unknown message type from player", "playerId", l.players[player].Id, "messageType", msg.Type)
@@ -181,8 +200,15 @@ func (l *Lobby) changeGameStateLocked(state GameState) {
 		// Assign roles: first player hides, second seeks.
 		l.players[0].SetRole(PlayerRoleHider)
 		l.players[1].SetRole(PlayerRoleSeeker)
+		l.sendPlayerListLocked()
 		go func() {
 			slog.Debug("Beginning Hiding phase timer", "duration", HidingTime)
+			msg, err := json.Marshal(OutgoingMessage{Type: MessageTypeHidingPhaseStart, Data: OutgoingHidingPhaseStart{Duration: int(HidingTime.Seconds())}})
+			if err != nil {
+				slog.Error("Failed to marshal hiding phase start message", "error", err)
+				return
+			}
+			l.broadcastLocked(msg)
 			time.Sleep(HidingTime)
 			slog.Debug("Hiding timer has elapsed")
 			l.changeGameState(Seeking)

@@ -101,7 +101,21 @@ func (q IncomingQuestionRequest) Ask(lobby *Lobby, asker *Player, answerer *Play
 			slog.Warn("Failed to unmarshal matching question data", "askerId", asker.Id, "error", err)
 			return err
 		}
-		// TODO: handle matching response automatically
+		// Handle matching response automatically
+		var hit bool
+		switch matchingQ.MatchingType {
+		case MatchingTypeNearestTubeLine:
+			hit = false
+		case MatchingTypeNearestHospital:
+			hit = false
+		case MatchingTypeNearestAirport:
+			hit = false
+		default:
+			slog.Warn("Received unknown matching question type", "matchingType", matchingQ.MatchingType, "askerId", asker.Id)
+			return errors.New("unknown matching question type")
+		}
+		resp, _ := json.Marshal(OutgoingMessage{Type: MessageTypePlayerAction, Data: OutgoingPlayerActionMessage{Action: PlayerActionAnswerQuestion, Data: OutgoingQuestionResponse{Type: QuestionTypeMatching, Data: MatchingResponse{MatchingType: matchingQ.MatchingType, Hit: hit}}}})
+		err = lobby.sendToPlayer(answerer.Id, resp)
 	default:
 		slog.Warn("Received unknown question type", "questionType", q.Type, "askerId", asker.Id)
 		return errors.New("unknown question type")
@@ -164,6 +178,10 @@ type PictureQuestion struct {
 	PictureType PictureType `json:"type"`
 }
 
+type PictureResponse struct {
+	PictureURL string `json:"pictureUrl"`
+}
+
 type MatchingType string
 
 const (
@@ -174,4 +192,9 @@ const (
 
 type MatchingQuestion struct {
 	MatchingType MatchingType `json:"type"`
+}
+
+type MatchingResponse struct {
+	MatchingType MatchingType `json:"type"`
+	Hit          bool         `json:"hit"`
 }

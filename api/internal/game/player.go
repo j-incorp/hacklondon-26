@@ -10,10 +10,10 @@ import (
 )
 
 type Player struct {
-	Id             string          `json:"id"`
-	Name           string          `json:"name"`
-	Role           PlayerRole      `json:"role"`
-	Position       Position        `json:"position"`
+	Id              string          `json:"id"`
+	Name            string          `json:"name"`
+	Role            PlayerRole      `json:"role"`
+	Position        Position        `json:"position"`
 	Conn            *websocket.Conn `json:"-"`
 	Send            chan []byte     `json:"-"`
 	Recv            chan []byte     `json:"-"`
