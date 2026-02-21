@@ -1,6 +1,6 @@
 import * as z from 'zod'
 
-import { position } from '../types'
+import { position } from '../../types'
 
 const radarResponseSchema = z.object({
   position,

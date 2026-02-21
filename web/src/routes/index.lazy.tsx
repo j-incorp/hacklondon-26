@@ -1,7 +1,7 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
 
-import { Tools } from '@/components/drawer/drawer'
 import { Location } from '@/components/location/location'
+import { Tools } from '@/components/tools/tools'
 
 const Page = () => {
   return (

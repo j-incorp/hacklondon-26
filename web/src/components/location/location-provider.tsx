@@ -26,6 +26,7 @@ const geolocationSupported = typeof navigator !== 'undefined' && 'geolocation' i
 
 const LocationProvider = ({ children, options }: LocationProviderProps): ReactElement => {
   const [location, setLocation] = useState<Position | undefined>(undefined)
+
   const [error, setError] = useState<GeolocationPositionError | undefined>(() => {
     if (!geolocationSupported) {
       return {
@@ -39,6 +40,7 @@ const LocationProvider = ({ children, options }: LocationProviderProps): ReactEl
 
     return undefined
   })
+
   const [loading, setLoading] = useState(geolocationSupported)
 
   useEffect(() => {

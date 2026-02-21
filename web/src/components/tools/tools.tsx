@@ -1,4 +1,4 @@
-import { CircleQuestionMark } from 'lucide-react'
+import { CircleQuestionMark, Toolbox } from 'lucide-react'
 import { type ReactElement } from 'react'
 
 import { Button } from '@/ui/button'
@@ -13,27 +13,33 @@ import {
   DrawerTrigger,
 } from '@/ui/drawer'
 
+import { Questions } from '../questions/question'
+
 const Tools = (): ReactElement => {
   return (
     <Drawer>
       <DrawerTrigger asChild>
         <Button
           size="icon"
-          className="rounded-full bg-orange-500 text-white hover:bg-orange-600 focus-visible:ring-orange-400"
+          className="rounded-full bg-primary text-white hover:bg-orange-600 focus-visible:ring-orange-400"
         >
           <CircleQuestionMark className="size-6" />
         </Button>
       </DrawerTrigger>
       <DrawerContent className="h-[60dvh]">
-        <DrawerHeader>
-          <DrawerTitle>Are you absolutely sure?</DrawerTitle>
-          <DrawerDescription>This action cannot be undone.</DrawerDescription>
+        <DrawerHeader className="mb-4">
+          <DrawerTitle className="inline-flex items-center justify-center gap-2">
+            <Toolbox className="size-5" />
+            Toolbox
+          </DrawerTitle>
+          <DrawerDescription>Use these tools to find the hider!</DrawerDescription>
         </DrawerHeader>
-        <div className="justify-center text-center">blah</div>
+        <div className="w-[90%] justify-center text-center mx-auto">
+          <Questions />
+        </div>
         <DrawerFooter>
-          <Button>Submit</Button>
           <DrawerClose asChild>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="outline">Close</Button>
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>
