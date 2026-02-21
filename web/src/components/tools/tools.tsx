@@ -9,7 +9,7 @@ interface ToolsProps {
   type?: 'seeker' | 'hider'
 }
 
-const Tools = ({ type = 'hider' }: ToolsProps): ReactElement => {
+const Tools = ({ type = 'seeker' }: ToolsProps): ReactElement => {
   return <Drawer>{type === 'seeker' ? <SeekerTools /> : <HiderTools />}</Drawer>
 }
 
