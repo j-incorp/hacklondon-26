@@ -9,8 +9,6 @@ function Page() {
   return (
     <div className="p-2">
       <div className="h-screen w-full">
-        {' '}
-        {/* or whatever height you want */}
         <MainMap />
       </div>
       <h3>Welcome Home!</h3>
