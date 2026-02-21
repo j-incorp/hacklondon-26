@@ -2,6 +2,7 @@ import tailwindcss from '@tailwindcss/vite'
 import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import react from '@vitejs/plugin-react-swc'
 import fs from 'fs'
+import path from 'path'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
@@ -32,10 +33,10 @@ export default defineConfig({
         enabled: true,
       },
       manifest: {
-        name: 'rat-pwa',
-        short_name: 'rat-pwa',
+        name: 'hacklondon26',
+        short_name: 'hacklondon26',
         start_url: '.',
-        description: 'react app template progressive web app',
+        description: 'hack london 26!!',
         display: 'standalone',
         background_color: '#ffffff',
         theme_color: '#ffffff',
@@ -56,4 +57,10 @@ export default defineConfig({
       },
     }),
   ],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+      '@shadcn': path.resolve(__dirname, './src/ui/shadcn'),
+    },
+  },
 })
