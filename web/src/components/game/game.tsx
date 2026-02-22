@@ -2,6 +2,7 @@ import { useStore } from '@tanstack/react-store'
 import { type ReactElement, useCallback, useEffect, useState } from 'react'
 import { useWebSocket } from 'react-use-websocket/dist/lib/use-websocket'
 
+import { useHand } from '@/hooks/use-hand'
 import { useLocation } from '@/hooks/use-location'
 import { useQuestions } from '@/hooks/use-questions'
 import { Button } from '@/ui/button'
@@ -45,6 +46,8 @@ const Game = (): ReactElement => {
   const [seekerLocation, setSeekerLocation] = useState<{ lat: number; long: number }>()
 
   const { addResponse } = useQuestions()
+
+  const { drawCard } = useHand()
 
   const joinUrl = disconnected
     ? null
@@ -171,6 +174,8 @@ const Game = (): ReactElement => {
               const { type, data: qData } = data as QuestionRequest
               switch (type) {
                 case 'RADAR':
+                  drawCard()
+
                   break
                 case 'PICTURE':
                   const pData = qData as PictureQuestion
@@ -182,6 +187,8 @@ const Game = (): ReactElement => {
                     },
                   }))
 
+                  drawCard()
+
                   break
                 case 'MATCHING':
                   // eslint-disable-next-line no-console
@@ -192,6 +199,7 @@ const Game = (): ReactElement => {
                   // eslint-disable-next-line no-console
                   console.warn('Received unknown question type', { type })
               }
+
               break
             case 'ANSWER_QUESTION':
               const { type: answerType, data: answerData } = data as QuestionResponse
@@ -203,6 +211,8 @@ const Game = (): ReactElement => {
                   data: answerData,
                 },
               }))
+
+              drawCard()
 
               break
             case 'VETO_QUESTION':
@@ -242,7 +252,7 @@ const Game = (): ReactElement => {
         }
       }
     },
-    [playerLat, playerLong, addResponse],
+    [playerLat, playerLong, addResponse, drawCard],
   )
 
   const handleClose = useCallback(() => {
