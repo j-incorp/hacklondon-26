@@ -1,7 +1,7 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
 
 import { CameraCapture } from '@/components/camera/camera-capture'
-import { LobbyForm } from '@/components/lobby/lobby-form'
+import { LobbyForms } from '@/components/lobby/lobby-forms'
 import { Location } from '@/components/location/location'
 import { MainMap } from '@/components/maps/main-map'
 import { Tools } from '@/components/tools/tools'
@@ -12,7 +12,7 @@ const Page = () => {
 
   const handleCapture = async (file: File) => {
     const key = await uploadImage(file)
-    
+
     console.log('Uploaded image key:', key)
   }
 
@@ -23,7 +23,7 @@ const Page = () => {
       <Tools type="seeker" />
       <Tools type="hider" />
       <Location />
-      <LobbyForm />
+      <LobbyForms />
       <div className="h-100">
         <MainMap />
       </div>

@@ -1,12 +1,24 @@
 import * as z from 'zod'
 
-const lobbyFormSchema = z.object({
+const joinLobbyFormSchema = z.object({
   code: z.string().length(4, 'Lobby code must be 4 characters long'),
   name: z.string(),
 })
 
-type LobbyFormSchema = z.infer<typeof lobbyFormSchema>
+type JoinLobbyFormSchema = z.infer<typeof joinLobbyFormSchema>
 
-export type { LobbyFormSchema }
+const createLobbyFormSchema = z.object({
+  name: z.string(),
+})
 
-export { lobbyFormSchema }
+type CreateLobbyFormSchema = z.infer<typeof createLobbyFormSchema>
+
+const createLobbyFormResponse = z.object({
+  code: z.string().length(4, 'Lobby code must be 4 characters long'),
+})
+
+type CreateLobbyFormResponse = z.infer<typeof createLobbyFormResponse>
+
+export type { CreateLobbyFormResponse, CreateLobbyFormSchema, JoinLobbyFormSchema }
+
+export { createLobbyFormResponse, createLobbyFormSchema, joinLobbyFormSchema }
