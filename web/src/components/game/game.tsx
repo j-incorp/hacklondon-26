@@ -3,25 +3,13 @@ import { type ReactElement, useCallback, useEffect, useState } from 'react'
 import { useWebSocket } from 'react-use-websocket/dist/lib/use-websocket'
 
 import { useLocation } from '@/hooks/use-location'
+import { Button } from '@/ui/button'
 
 import { MainMap } from '../maps/main-map'
 import { gameStore } from './game-store'
-import type { Player, PlayerRole } from './types'
+import { PlayerList } from './player-list'
+import type { PlayerRole } from './types'
 import { message } from './types'
-
-const PlayerList = ({ players }: { players: Player[] }): ReactElement => (
-  <ul className="p-4 space-y-2">
-    {players ? (
-      players.map((p) => (
-        <li key={p.id} className="text-lg">
-          {p.name}
-        </li>
-      ))
-    ) : (
-      <li className="text-gray-500">No players yet</li>
-    )}
-  </ul>
-)
 
 const HidingOverlay = ({ endTime }: { endTime: Date }): ReactElement | null => {
   const [secondsLeft, setSecondsLeft] = useState(() => Math.max(0, Math.ceil((endTime.getTime() - Date.now()) / 1000)))
@@ -207,20 +195,16 @@ const Game = (): ReactElement => {
   }, [store.lobby.code])
 
   return (
-    <div className="w-full h-full bg-gray-100">
+    <div className="flex flex-col w-full h-full text-center justify-center items-center content-center pt-24">
       {store.gameState === 'HIDING' && <HidingOverlay endTime={store.hidingPhaseEndTime} />}
       {store.gameState === 'WAITING_FOR_PLAYERS' ? (
         <>
           <h1 className="text-4xl font-bold">Lobby {store.lobby.code}</h1>
           <PlayerList players={store.lobby.players} />
           {store.lobby.players?.length === 2 && (
-            <button
-              className="mx-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-              onClick={startGame}
-              type="button"
-            >
+            <Button className="" onClick={startGame} type="button">
               Start Game
-            </button>
+            </Button>
           )}
         </>
       ) : (
