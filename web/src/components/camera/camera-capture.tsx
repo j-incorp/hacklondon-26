@@ -11,6 +11,7 @@ interface CameraCaptureProps {
 
 const CameraCapture = ({ onCapture, className }: CameraCaptureProps): ReactElement => {
   const inputRef = useRef<HTMLInputElement>(null)
+
   const [loading, setLoading] = useState(false)
 
   const handleClick = () => {

@@ -11,9 +11,7 @@ const Page = () => {
   const uploadImage = useImageUpload()
 
   const handleCapture = async (file: File) => {
-    const key = await uploadImage(file)
-
-    console.log('Uploaded image key:', key)
+    await uploadImage(file)
   }
 
   return (
