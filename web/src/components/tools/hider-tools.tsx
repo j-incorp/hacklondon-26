@@ -1,7 +1,8 @@
 import { Book, WalletCards } from 'lucide-react'
 import type { ReactElement, TouchEvent } from 'react'
-import { useMemo, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 
+import { useHand } from '@/hooks/use-hand'
 import { isNonEmptyArray } from '@/lib/is/is-non-empty-array'
 import { Button } from '@/ui/button'
 import {
@@ -14,15 +15,17 @@ import {
   DrawerTrigger,
 } from '@/ui/drawer'
 
+import { Card } from '../cards/card'
 import { CardSelection } from '../cards/card-selection'
-import { Curse } from '../cards/curses/curse'
 
 const CARDS_PER_PAGE = 3
 
 const HiderTools = (): ReactElement => {
-  const questions = useMemo(() => [<Curse />, <Curse />, <Curse />, <Curse />], [])
+  const { getCards } = useHand()
 
-  const totalPages = Math.ceil(questions.length / CARDS_PER_PAGE)
+  const cards = getCards()
+
+  const totalPages = Math.ceil(cards.length / CARDS_PER_PAGE)
 
   const [activePage, setActivePage] = useState(0)
   const [direction, setDirection] = useState<'next' | 'prev'>('next')
@@ -71,7 +74,7 @@ const HiderTools = (): ReactElement => {
 
   const startIndex = activePage * CARDS_PER_PAGE
 
-  const visibleCards = questions.slice(startIndex, startIndex + CARDS_PER_PAGE)
+  const visibleCards = cards.slice(startIndex, startIndex + CARDS_PER_PAGE)
 
   return (
     <Drawer>
@@ -96,21 +99,25 @@ const HiderTools = (): ReactElement => {
         </DrawerHeader>
         <div
           key={activePage}
-          className={`flex-1 animate-in fade-in duration-300 ${
+          className={`h-[60%] flex flex-col items-center justify-center animate-in fade-in duration-300 ${
             direction === 'next' ? 'slide-in-from-right-6' : 'slide-in-from-left-6'
           }`}
         >
-          <div className="px-4">
+          <div className="px-4 h-full w-full">
             <CardSelection>
               {isNonEmptyArray(visibleCards)
-                ? visibleCards.map((card, index) => <div key={`card-${startIndex + index}`}>{card}</div>)
+                ? visibleCards.map((card, index) => (
+                    <div key={`card-${startIndex + index}`}>
+                      <Card card={card} />
+                    </div>
+                  ))
                 : undefined}
             </CardSelection>
           </div>
         </div>
         <DrawerFooter className="h-auto">
           <div className="flex items-center justify-center gap-2" aria-label="Question progress">
-            {isNonEmptyArray(questions) &&
+            {isNonEmptyArray(cards) &&
               Array.from({ length: totalPages }).map((_, index) => (
                 <span
                   key={`page-dot-${index}`}

@@ -1,11 +1,11 @@
 import type { ReactElement } from 'react'
 
-import { useLobbyForm } from '@/hooks/use-lobby-form'
+import { useJoinLobbyForm } from '@/hooks/use-join-lobby-form'
 import { Button } from '@/ui/button'
 import { Input } from '@/ui/input'
 
-const LobbyForm = (): ReactElement => {
-  const form = useLobbyForm()
+const JoinLobbyForm = (): ReactElement => {
+  const form = useJoinLobbyForm()
 
   return (
     <form
@@ -105,4 +105,4 @@ const LobbyForm = (): ReactElement => {
   )
 }
 
-export { LobbyForm }
+export { JoinLobbyForm }
