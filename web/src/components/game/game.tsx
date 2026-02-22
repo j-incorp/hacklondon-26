@@ -3,10 +3,16 @@ import { type ReactElement, useCallback, useEffect, useState } from 'react'
 import { useWebSocket } from 'react-use-websocket/dist/lib/use-websocket'
 
 import { useLocation } from '@/hooks/use-location'
+import { Button } from '@/ui/button'
 
+import { HandProvider } from '../cards/hand-provider'
 import { MainMap } from '../maps/main-map'
+import { QuestionsProvider } from '../questions/questions-provider'
+import { Tools } from '../tools/tools'
 import { gameStore } from './game-store'
-import type { Player, PlayerRole } from './types'
+import { HidingOverlay } from './hiding-overlay'
+import { PlayerList } from './player-list'
+import type { PlayerRole } from './types'
 import { message } from './types'
 
 const PlayerList = ({ players }: { players: Player[] }): ReactElement => (
@@ -225,8 +231,8 @@ const Game = (): ReactElement => {
       sendJsonMessage({
         type: 'PLAYER_POSITION',
         data: {
-          lat: location.latitude,
-          long: location.longitude,
+          lat: location.lat,
+          long: location.long,
         },
       })
     }, 10_000)
@@ -239,28 +245,31 @@ const Game = (): ReactElement => {
   }, [store.lobby.code])
 
   return (
-    <div className="w-full h-full bg-gray-100">
+    <div className="flex flex-col w-full h-full text-center justify-center items-center content-center">
       {store.gameState === 'HIDING' && <HidingOverlay endTime={store.hidingPhaseEndTime} />}
       {store.gameState === 'WAITING_FOR_PLAYERS' ? (
         <>
-          <h1 className="text-4xl font-bold">Lobby {store.lobby.code}</h1>
+          <h1 className="text-4xl font-bold pt-24">Lobby {store.lobby.code}</h1>
           <PlayerList players={store.lobby.players} />
           {store.lobby.players?.length === 2 && (
-            <button
-              className="mx-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-              onClick={startGame}
-              type="button"
-            >
+            <Button className="" onClick={startGame} type="button">
               Start Game
-            </button>
+            </Button>
           )}
         </>
       ) : (
-        <div className="h-100">
+        <div className="relative h-screen w-full">
           <MainMap lat={51.505} lng={-0.09} zoom={11} />
-          <p className="p-4 text-center text-lg font-semibold">
+          <p className="pointer-events-none absolute left-0 top-0 w-full bg-black/50 p-3 text-center text-lg font-semibold text-white mt-2">
             You are the <span className="uppercase">{store.role}</span>
           </p>
+          <div className="absolute bottom-4 right-4 z-40">
+            <QuestionsProvider>
+              <HandProvider>
+                <Tools type={store.role} />
+              </HandProvider>
+            </QuestionsProvider>
+          </div>
         </div>
       )}
     </div>

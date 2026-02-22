@@ -1,10 +1,10 @@
 import type { ReactElement, ReactNode } from 'react'
 import { createContext, useEffect, useMemo, useState } from 'react'
 
-import type { Location } from '../types'
+import type { Position } from '../game/types'
 
 interface LocationProviderState {
-  location?: Location
+  location?: Position
   error?: GeolocationPositionError
   loading?: boolean
 }
@@ -25,7 +25,7 @@ interface LocationProviderProps {
 const geolocationSupported = typeof navigator !== 'undefined' && 'geolocation' in navigator
 
 const LocationProvider = ({ children, options }: LocationProviderProps): ReactElement => {
-  const [location, setLocation] = useState<Location | undefined>(undefined)
+  const [location, setLocation] = useState<Position | undefined>(undefined)
 
   const [error, setError] = useState<GeolocationPositionError | undefined>(() => {
     if (!geolocationSupported) {
@@ -50,9 +50,8 @@ const LocationProvider = ({ children, options }: LocationProviderProps): ReactEl
 
     const onSuccess = (position: GeolocationPosition) => {
       setLocation({
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude,
-        accuracy: position.coords.accuracy,
+        lat: position.coords.latitude,
+        long: position.coords.longitude,
       })
 
       setError(undefined)

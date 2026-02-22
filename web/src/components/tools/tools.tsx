@@ -6,11 +6,11 @@ import { HiderTools } from './hider-tools'
 import { SeekerTools } from './seeker-tools'
 
 interface ToolsProps {
-  type?: 'seeker' | 'hider'
+  type?: 'HIDER' | 'SEEKER' | ''
 }
 
-const Tools = ({ type = 'seeker' }: ToolsProps): ReactElement => {
-  return <Drawer>{type === 'seeker' ? <SeekerTools /> : <HiderTools />}</Drawer>
+const Tools = ({ type = 'SEEKER' }: ToolsProps): ReactElement => {
+  return <Drawer>{type === 'SEEKER' ? <SeekerTools /> : <HiderTools />}</Drawer>
 }
 
 export { Tools }

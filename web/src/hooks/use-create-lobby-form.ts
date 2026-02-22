@@ -46,12 +46,14 @@ const useCreateLobbyForm = () => {
         lobby: {
           code: lobby.data.code,
           name: value.name,
+          players: [],
         },
       }))
 
       setLobby({
         code: lobby.data.code,
         name: value.name,
+        players: [],
       })
 
       await navigate({ to: '/game' })

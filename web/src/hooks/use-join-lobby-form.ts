@@ -24,12 +24,14 @@ const useJoinLobbyForm = () => {
         lobby: {
           code: value.code,
           name: value.name,
+          players: [],
         },
       }))
 
       setLobby({
         code: value.code,
         name: value.name,
+        players: [],
       })
 
       await navigate({ to: '/game' })
