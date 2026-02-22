@@ -126,3 +126,12 @@
     @apply font-sans;
   }
 }
+
+/* Leaflet z-index reset to prevent overlaying drawers */
+.leaflet-container {
+  z-index: 0 !important;
+}
+
+.leaflet-control {
+  z-index: 1 !important;
+}

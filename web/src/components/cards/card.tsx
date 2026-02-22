@@ -1,19 +1,33 @@
-import type { ReactElement, ReactNode } from 'react'
+import type { ReactElement } from 'react'
 
-import type { CardType } from './types'
+import { Curse } from './curses/curse'
+import { Duplicate } from './duplicate/duplicate'
+import { TimeBonus } from './time-bonus/time-bonus'
+import type { Card } from './types'
+import { Veto } from './veto/veto'
 
 interface CardProps {
-  cardType: CardType
-  children?: ReactNode
+  card: Card
 }
 
-const Card = (props: CardProps): ReactElement => {
-  return (
-    <div>
-      {props.cardType}
-      {props.children}
-    </div>
-  )
+const Card = ({ card }: CardProps): ReactElement => {
+  if (card.type === 'veto') {
+    return <Veto />
+  }
+
+  if (card.type === 'time-bonus') {
+    return <TimeBonus card={card} />
+  }
+
+  if (card.type === 'curse') {
+    return <Curse card={card} />
+  }
+
+  if (card.type === 'duplicate') {
+    return <Duplicate />
+  }
+
+  return <div></div>
 }
 
 export { Card }

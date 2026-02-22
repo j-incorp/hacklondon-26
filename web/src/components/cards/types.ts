@@ -4,9 +4,33 @@ const cardType = z.literal(['curse', 'time-bonus', 'veto', 'duplicate'])
 
 type CardType = z.infer<typeof cardType>
 
-const card = z.object({
-  type: cardType,
+const veto = z.object({
+  type: z.literal('veto'),
 })
+
+type Veto = z.infer<typeof veto>
+
+const timeBonus = z.object({
+  type: z.literal('time-bonus'),
+  amount: z.number(),
+})
+
+type TimeBonus = z.infer<typeof timeBonus>
+
+const curse = z.object({
+  type: z.literal('curse'),
+  title: z.string(),
+})
+
+type Curse = z.infer<typeof curse>
+
+const duplicate = z.object({
+  type: z.literal('duplicate'),
+})
+
+type Duplicate = z.infer<typeof duplicate>
+
+const card = z.discriminatedUnion('type', [veto, timeBonus, curse, duplicate])
 
 type Card = z.infer<typeof card>
 
@@ -16,12 +40,12 @@ const deck = z.object({
 
 type Deck = z.infer<typeof deck>
 
-const hand = z.object({
+const handData = z.object({
   cards: z.array(card),
 })
 
-type Hand = z.infer<typeof hand>
+type HandData = z.infer<typeof handData>
 
-export type { Card, CardType, Deck, Hand }
+export type { Card, CardType, Curse, Deck, Duplicate, HandData, TimeBonus, Veto }
 
-export { card, cardType, deck, hand }
+export { card, cardType, curse, deck, duplicate, handData, timeBonus, veto }

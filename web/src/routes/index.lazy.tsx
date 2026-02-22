@@ -1,6 +1,7 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
 
 import { CameraCapture } from '@/components/camera/camera-capture'
+import { HandProvider } from '@/components/cards/hand-provider'
 import { LobbyForms } from '@/components/lobby/lobby-forms'
 import { Location } from '@/components/location/location'
 import { MainMap } from '@/components/maps/main-map'
@@ -19,7 +20,9 @@ const Page = () => {
       <h3>Welcome Home!</h3>
       <CameraCapture onCapture={handleCapture} />
       <Tools type="seeker" />
-      <Tools type="hider" />
+      <HandProvider>
+        <Tools type="hider" />
+      </HandProvider>
       <Location />
       <LobbyForms />
       <div className="h-100">

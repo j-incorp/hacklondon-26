@@ -6,8 +6,8 @@ interface CardSelectionProps {
 
 const CardSelection = ({ children }: CardSelectionProps) => {
   return (
-    <div className="w-full">
-      <div className="grid w-full grid-flow-col auto-cols-fr items-start gap-4">{children}</div>
+    <div className="w-full h-full">
+      <div className="grid h-full w-full grid-flow-col auto-cols-fr items-center gap-4">{children}</div>
     </div>
   )
 }
