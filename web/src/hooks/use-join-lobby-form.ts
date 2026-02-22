@@ -2,14 +2,19 @@ import { useForm } from '@tanstack/react-form'
 import { useNavigate } from '@tanstack/react-router'
 
 import { gameStore } from '@/components/game/game-store'
-import { defaultLobbyFormMeta } from '@/components/lobby/meta'
-import { lobbyFormSchema } from '@/components/lobby/types'
+import type { Lobby } from '@/components/game/types'
+import { defaultJoinLobbyFormMeta } from '@/components/lobby/meta'
+import { joinLobbyFormSchema } from '@/components/lobby/types'
 
-const useLobbyForm = () => {
+import { useLocalStorage } from './use-local-storage'
+
+const useJoinLobbyForm = () => {
   const navigate = useNavigate()
 
+  const [_, setLobby] = useLocalStorage<Lobby | undefined>('lobby', undefined)
+
   return useForm({
-    ...defaultLobbyFormMeta,
+    ...defaultJoinLobbyFormMeta,
     onSubmit: async ({ value }) => {
       // eslint-disable-next-line no-console
       console.log('Submitted value:', value)
@@ -22,11 +27,16 @@ const useLobbyForm = () => {
         },
       }))
 
+      setLobby({
+        code: value.code,
+        name: value.name,
+      })
+
       await navigate({ to: '/game' })
     },
     validators: {
       onSubmit: ({ value }) => {
-        const result = lobbyFormSchema.safeParse(value)
+        const result = joinLobbyFormSchema.safeParse(value)
 
         if (!result.success) {
           const { fieldErrors, formErrors } = result.error.flatten()
@@ -43,4 +53,4 @@ const useLobbyForm = () => {
   })
 }
 
-export { useLobbyForm }
+export { useJoinLobbyForm }

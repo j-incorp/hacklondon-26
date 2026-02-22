@@ -1,8 +1,14 @@
-const defaultLobbyFormMeta = {
+const defaultJoinLobbyFormMeta = {
   defaultValues: {
     code: '',
     name: '',
   },
 }
 
-export { defaultLobbyFormMeta }
+const defaultCreateLobbyFormMeta = {
+  defaultValues: {
+    name: '',
+  },
+}
+
+export { defaultCreateLobbyFormMeta, defaultJoinLobbyFormMeta }
