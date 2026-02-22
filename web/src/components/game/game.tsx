@@ -47,122 +47,154 @@ const HidingOverlay = ({ endTime }: { endTime: Date }): ReactElement | null => {
 const Game = (): ReactElement => {
   const store = useStore(gameStore, (state) => state)
 
+  const [disconnected, setDisconnected] = useState(false)
+
   const { location } = useLocation()
 
-  const { sendJsonMessage } = useWebSocket(
-    `ws://${import.meta.env.VITE_API_URL}/lobby/${store.lobby.code}?name=${store.lobby.name}`,
-    {
-      onMessage: (event: MessageEvent<string>) => {
-        const parsed = message.safeParse(JSON.parse(event.data))
+  const joinUrl = disconnected
+    ? null
+    : `ws://${import.meta.env.VITE_API_URL}/lobby/${store.lobby.code}?name=${store.lobby.name}`
 
-        if (!parsed.success) {
+  const reconnectUrl = disconnected
+    ? `ws://${import.meta.env.VITE_API_URL}/lobby/${store.lobby.code}/reconnect?id=${store.playerId}`
+    : null
+
+  const handleMessage = useCallback((event: MessageEvent<string>) => {
+    const parsed = message.safeParse(JSON.parse(event.data))
+
+    if (!parsed.success) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to parse incoming message', parsed.error)
+
+      return
+    }
+
+    const msg = parsed.data
+
+    switch (msg.type) {
+      case 'PLAYER_INFO': {
+        const { id, name, role } = msg.data
+
+        // eslint-disable-next-line no-console
+        console.log('Player info received', { id, name, role })
+        gameStore.setState((prev) => ({ ...prev, playerId: id, role: role as PlayerRole }))
+
+        break
+      }
+
+      case 'PLAYER_JOINED': {
+        const { playerId } = msg.data
+
+        // eslint-disable-next-line no-console
+        console.log('Player joined', { playerId })
+
+        break
+      }
+
+      case 'PLAYER_LEFT': {
+        const { playerId } = msg.data
+
+        // eslint-disable-next-line no-console
+        console.log('Player left', { playerId })
+
+        break
+      }
+
+      case 'GAME_STATE_CHANGE': {
+        const { state } = msg.data
+
+        // eslint-disable-next-line no-console
+        console.log('Game state changed', { state })
+
+        gameStore.setState((prev) => ({ ...prev, gameState: state }))
+
+        break
+      }
+
+      case 'HIDING_PHASE_START': {
+        const { duration } = msg.data
+
+        // eslint-disable-next-line no-console
+        console.log('Hiding phase started', { duration })
+
+        gameStore.setState((prev) => ({
+          ...prev,
+          hidingPhaseEndTime: new Date(Date.now() + duration * 1000),
+        }))
+
+        break
+      }
+
+      case 'PLAYER_POSITION': {
+        const { lat, long } = msg.data
+
+        // eslint-disable-next-line no-console
+        console.log('Player position update', { lat, long })
+
+        break
+      }
+
+      case 'PLAYER_ACTION': {
+        const { action, data } = msg.data
+
+        // eslint-disable-next-line no-console
+        console.log('Player action received', { action, data })
+
+        break
+      }
+
+      case 'PLAYER_LIST_UPDATE': {
+        const { players } = msg.data
+
+        // eslint-disable-next-line no-console
+        console.log('Player list updated', { players })
+
+        if (players.find((p) => p.id === gameStore.state.playerId)) {
           // eslint-disable-next-line no-console
-          console.error('Failed to parse incoming message', parsed.error)
-
-          return
+          console.log('Current player is in the updated player list')
+          // Update the player's role
+          gameStore.setState((prev) => ({
+            ...prev,
+            role: players.find((p) => p.id === prev.playerId)?.role || '',
+          }))
         }
 
-        const msg = parsed.data
+        gameStore.setState((prev) => ({
+          ...prev,
+          lobby: { ...prev.lobby, players },
+        }))
 
-        switch (msg.type) {
-          case 'PLAYER_INFO': {
-            const { id, name, role } = msg.data
+        break
+      }
+    }
+  }, [])
 
-            // eslint-disable-next-line no-console
-            console.log('Player info received', { id, name, role })
-            gameStore.setState((prev) => ({ ...prev, playerId: id, role: role as PlayerRole }))
+  const handleClose = useCallback(() => {
+    if (gameStore.state.gameState !== 'WAITING_FOR_PLAYERS') {
+      setDisconnected(true)
+    }
+  }, [])
 
-            break
-          }
+  const handleOpen = useCallback(() => {
+    setDisconnected(false)
+  }, [])
 
-          case 'PLAYER_JOINED': {
-            const { playerId } = msg.data
+  const { sendJsonMessage: joinSend } = useWebSocket(joinUrl, {
+    onMessage: handleMessage,
+    onClose: handleClose,
+    onOpen: handleOpen,
+  })
 
-            // eslint-disable-next-line no-console
-            console.log('Player joined', { playerId })
+  const { sendJsonMessage: reconnectSend } = useWebSocket(reconnectUrl, {
+    shouldReconnect: () => true,
+    reconnectAttempts: Infinity,
+    reconnectInterval: 5000,
+    onMessage: handleMessage,
+    onClose: handleClose,
+    onOpen: handleOpen,
+  })
 
-            break
-          }
-
-          case 'PLAYER_LEFT': {
-            const { playerId } = msg.data
-
-            // eslint-disable-next-line no-console
-            console.log('Player left', { playerId })
-
-            break
-          }
-
-          case 'GAME_STATE_CHANGE': {
-            const { state } = msg.data
-
-            // eslint-disable-next-line no-console
-            console.log('Game state changed', { state })
-
-            gameStore.setState((prev) => ({ ...prev, gameState: state }))
-
-            break
-          }
-
-          case 'HIDING_PHASE_START': {
-            const { duration } = msg.data
-
-            // eslint-disable-next-line no-console
-            console.log('Hiding phase started', { duration })
-
-            gameStore.setState((prev) => ({
-              ...prev,
-              hidingPhaseEndTime: new Date(Date.now() + duration * 1000),
-            }))
-
-            break
-          }
-
-          case 'PLAYER_POSITION': {
-            const { lat, long } = msg.data
-
-            // eslint-disable-next-line no-console
-            console.log('Player position update', { lat, long })
-
-            break
-          }
-
-          case 'PLAYER_ACTION': {
-            const { action, data } = msg.data
-
-            // eslint-disable-next-line no-console
-            console.log('Player action received', { action, data })
-
-            break
-          }
-
-          case 'PLAYER_LIST_UPDATE': {
-            const { players } = msg.data
-
-            // eslint-disable-next-line no-console
-            console.log('Player list updated', { players })
-
-            if (players.find((p) => p.id === store.playerId)) {
-              // eslint-disable-next-line no-console
-              console.log('Current player is in the updated player list')
-              // Update the player's role
-              gameStore.setState((prev) => ({
-                ...prev,
-                role: players.find((p) => p.id === prev.playerId)?.role || '',
-              }))
-            }
-
-            gameStore.setState((prev) => ({
-              ...prev,
-              lobby: { ...prev.lobby, players },
-            }))
-
-            break
-          }
-        }
-      },
-    },
-  )
+  const sendJsonMessage = disconnected ? reconnectSend : joinSend
 
   useEffect(() => {
     gameStore.setState((prev) => ({ ...prev, sendJsonMessage }))
