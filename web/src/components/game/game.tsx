@@ -37,6 +37,8 @@ const Game = (): ReactElement => {
       // eslint-disable-next-line no-console
       console.error('Failed to parse incoming message', parsed.error)
 
+      console.log(event.data);
+
       return
     }
 
