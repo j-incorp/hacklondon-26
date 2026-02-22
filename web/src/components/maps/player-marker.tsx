@@ -1,6 +1,6 @@
+import L from 'leaflet'
 import { type ReactElement, useEffect, useRef } from 'react'
-import { Marker, Popup, useMap } from 'react-leaflet'
-import L, { icon } from 'leaflet'
+import { Marker, useMap } from 'react-leaflet'
 interface PlayerMarkerProps {
   lat: number
   lng: number
@@ -56,7 +56,7 @@ const PlayerMarker = ({ lat, lng, color = '#f54900' }: PlayerMarkerProps): React
       markerRef.current.setLatLng([lat, lng])
       map.panTo([lat, lng])
     }
-  }, [lat, lng, color])
+  }, [lat, lng, color, map])
 
   return <Marker ref={markerRef} position={[lat, lng]} icon={createPlayerIcon(color)}></Marker>
 }

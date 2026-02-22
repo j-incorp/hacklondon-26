@@ -22,14 +22,10 @@ const TubeLineMask = ({ lineName, lineSuccess = false, color = 'black' }: TubeLi
     void getTubeStationsByLine(lineName.toLowerCase()).then(setStations)
   }, [lineName])
 
-  console.log(`Stations for line ${lineName}:`, stations)
-
   const stationCentroids = stations.map((station) => [station.lat, station.lng])
 
-  console.log(`Station centroids for line ${lineName}:`, stationCentroids)
-
   if (lineSuccess) {
-    const londonBoundaryPolygon = polygon(londonBoundary?.geometry.coordinates as any)
+    const londonBoundaryPolygon = polygon(londonBoundary?.geometry.coordinates as [number, number][][])
 
     const cutouts = stationCentroids.map((centroid) => {
       // Create a small circle around each station centroid to use as a cutout
@@ -49,11 +45,9 @@ const TubeLineMask = ({ lineName, lineSuccess = false, color = 'black' }: TubeLi
     })
 
     // Union the combined cutout with the London boundary to create the mask
-    const mask = difference(featureCollection([londonBoundaryPolygon, combinedCutout as any]))
+    const mask = difference(featureCollection([londonBoundaryPolygon, combinedCutout]))
 
     if (!mask) {
-      console.error(`Failed to create tube line mask for line ${lineName}`)
-
       return <div className="tubeLineMask">Tube Line Mask for {lineName} Failed</div>
     }
 

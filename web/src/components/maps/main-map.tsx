@@ -1,15 +1,16 @@
 /* eslint-disable no-console */
 import { type Feature, type MultiPolygon, type Polygon } from 'geojson'
-import { type ReactElement, useEffect } from 'react'
+import { type ReactElement } from 'react'
 import { MapContainer, TileLayer } from 'react-leaflet'
 import { GeoJSON } from 'react-leaflet'
 
 import londonMask from '@/components/maps/consts/london-boundary.json'
 import { getLondonBorough } from '@/lib/geo/geo-utils'
 
-import { BoroughMask } from './borough-mask'
-import { TubeLineMask } from './tube-line-mask'
+// import { MapRadarMask } from './map-radar-mask'
+// import { BoroughMask } from './borough-mask'
 import { PlayerMarker } from './player-marker'
+// import { TubeLineMask } from './tube-line-mask'
 
 const hattonCross = [51.46644304791559, -0.4234032595292248]
 
