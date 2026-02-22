@@ -8,13 +8,14 @@ import { isNonEmptyArray } from '@/lib/is/is-non-empty-array'
 interface BoroughMaskProps {
   boroughName: string
   boroughSuccess?: boolean
+  color?: string
 }
 
 const boroughBoundary = getLondonBoroughBoundary('Hammersmith and Fulham')
 
 console.log('Borough Boundary:', boroughBoundary)
 
-const BoroughMask = ({ boroughName, boroughSuccess }: BoroughMaskProps): ReactElement => {
+const BoroughMask = ({ boroughName, boroughSuccess, color = 'black' }: BoroughMaskProps): ReactElement => {
   if (boroughSuccess) {
     const boroughBoundary = getLondonBoroughBoundary(boroughName)
 
@@ -24,16 +25,10 @@ const BoroughMask = ({ boroughName, boroughSuccess }: BoroughMaskProps): ReactEl
       return <div className="mapRadarMask">Mask Failed</div>
     }
     return (
-      <GeoJSON
-        key={`${boroughName}-mask`}
-        data={mask}
-        style={{ fillColor: 'black', fillOpacity: 0.5, color: 'black' }}
-      />
+      <GeoJSON key={`${boroughName}-mask`} data={mask} style={{ fillColor: 'black', fillOpacity: 0.5, color: color }} />
     )
   } else {
     const boroughBoundaries = getLondonBoroughBoundaries(boroughName).map((feature) => feature.geometry)
-
-    console.log('Borough Boundaries:', boroughBoundaries)
 
     if (!boroughBoundaries || boroughBoundaries.length === 0) {
       return <div className="mapRadarMask">Mask Failed</div>
@@ -46,7 +41,7 @@ const BoroughMask = ({ boroughName, boroughSuccess }: BoroughMaskProps): ReactEl
               <GeoJSON
                 key={`${boroughName}-mask-${index}`}
                 data={boundary}
-                style={{ fillColor: 'black', fillOpacity: 0.5, color: 'black' }}
+                style={{ fillColor: 'black', fillOpacity: 0.5, color: color, weight: 1.5 }}
               />
             ))
           : undefined}

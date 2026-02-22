@@ -14,7 +14,7 @@ const Page = () => {
       <Location />
       <LobbyForm />
       <div className="h-100">
-        <MainMap />
+        <MainMap center={[51.505, -0.09]} zoom={9} />
       </div>
     </div>
   )

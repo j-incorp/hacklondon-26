@@ -109,6 +109,29 @@ const getTubeStopInfo = async (lat: number, lng: number): Promise<TubeStopInfo> 
   }
 }
 
+const getTubeStationsByLine = async (
+  lineName: string,
+): Promise<{ stationName: string; lat: number; lng: number }[]> => {
+  console.log(`Fetching tube stations for line: ${lineName}`)
+
+  const url = new URL(`https://api.tfl.gov.uk/Line/${lineName}/StopPoints`)
+
+  const response = await fetch(url)
+  const data = await response.json()
+
+  console.log('TFL API response:', data)
+
+  if (data.length === 0) {
+    return []
+  }
+
+  return data.map((stop: { commonName: string; lat: number; lon: number }) => ({
+    stationName: stop.commonName,
+    lat: stop.lat,
+    lng: stop.lon,
+  }))
+}
+
 const getLocationInfo = async (lat: number, lng: number) => {
   const borough = getLondonBorough(lat, lng)
   const tubeInfo = await getTubeStopInfo(lat, lng)
@@ -136,6 +159,7 @@ export {
   getLondonBorough,
   getLondonBoroughBoundaries,
   getLondonBoroughBoundary,
+  getTubeStationsByLine,
   getTubeStopInfo,
   londonBoundary,
 }
