@@ -29,7 +29,10 @@ const Game = (): ReactElement => {
   const [gameDuration, setGameDuration] = useState<string | null>(null)
   const [mapKids, setMapKids] = useState<ReactElement[]>([])
 
-  const { location: playerLocation, loading, error } = useLocation()
+  const { location: playerLocation } = useLocation()
+
+  const playerLat = playerLocation?.lat ?? 51.5074
+  const playerLong = playerLocation?.long ?? -0.1278
   const [seekerLocation, setSeekerLocation] = useState<{ lat: number; long: number }>()
 
   const joinUrl = disconnected
@@ -40,140 +43,145 @@ const Game = (): ReactElement => {
     ? `ws://${import.meta.env.VITE_API_URL}/lobby/${store.lobby.code}/reconnect?id=${store.playerId}`
     : null
 
-  const handleMessage = useCallback((event: MessageEvent<string>) => {
-    const parsed = message.safeParse(JSON.parse(event.data))
+  const handleMessage = useCallback(
+    (event: MessageEvent<string>) => {
+      const parsed = message.safeParse(JSON.parse(event.data))
 
-    if (!parsed.success) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to parse incoming message', parsed.error)
-
-      console.log(event.data)
-
-      return
-    }
-
-    const msg = parsed.data
-
-    switch (msg.type) {
-      case 'PLAYER_INFO': {
-        const { id, name, role } = msg.data
-
+      if (!parsed.success) {
         // eslint-disable-next-line no-console
-        console.log('Player info received', { id, name, role })
-        gameStore.setState((prev) => ({ ...prev, playerId: id, role: role as PlayerRole }))
+        console.error('Failed to parse incoming message', parsed.error)
 
-        break
+        console.log(event.data)
+
+        return
       }
 
-      case 'PLAYER_JOINED': {
-        const { playerId } = msg.data
+      const msg = parsed.data
 
-        // eslint-disable-next-line no-console
-        console.log('Player joined', { playerId })
+      switch (msg.type) {
+        case 'PLAYER_INFO': {
+          const { id, name, role } = msg.data
 
-        break
-      }
+          // eslint-disable-next-line no-console
+          console.log('Player info received', { id, name, role })
+          gameStore.setState((prev) => ({ ...prev, playerId: id, role: role as PlayerRole }))
 
-      case 'PLAYER_LEFT': {
-        const { playerId } = msg.data
-
-        // eslint-disable-next-line no-console
-        console.log('Player left', { playerId })
-
-        break
-      }
-
-      case 'GAME_STATE_CHANGE': {
-        const { state } = msg.data
-
-        // eslint-disable-next-line no-console
-        console.log('Game state changed', { state })
-
-        gameStore.setState((prev) => ({ ...prev, gameState: state }))
-
-        break
-      }
-
-      case 'HIDING_PHASE_START': {
-        const { duration } = msg.data
-
-        // eslint-disable-next-line no-console
-        console.log('Hiding phase started', { duration })
-
-        gameStore.setState((prev) => ({
-          ...prev,
-          hidingPhaseEndTime: new Date(Date.now() + duration * 1000),
-        }))
-
-        break
-      }
-
-      case 'PLAYER_POSITION': {
-        // Seekers position
-        const { lat, long } = msg.data
-
-        setSeekerLocation({ lat, long })
-        // eslint-disable-next-line no-console
-        console.log('Player position update', { lat, long })
-
-        break
-      }
-
-      case 'PLAYER_ACTION': {
-        const { action, data } = msg.data
-
-        switch (action) {
-          case 'ANSWER_QUESTION': {
-            const response = data as QuestionResponse
-            switch (response.type) {
-              case 'RADAR': {
-                const radarResponse = response.data as RadarResponse
-                const { radius } = radarResponse
-
-                console.log('Radar question answered', { playerLat, playerLong, radius })
-
-                const radar = MapRadarMask({ center: [playerLat, playerLong], radius, radarSuccess: radarResponse.hit })
-
-                setMapKids((prev) => [...prev, radar])
-
-                break
-              }
-            }
-            break
-          }
+          break
         }
 
-        // eslint-disable-next-line no-console
-        console.log('Player action received', { action, data })
+        case 'PLAYER_JOINED': {
+          const { playerId } = msg.data
 
-        break
-      }
-
-      case 'PLAYER_LIST_UPDATE': {
-        const { players } = msg.data
-
-        // eslint-disable-next-line no-console
-        console.log('Player list updated', { players })
-
-        if (players.find((p) => p.id === gameStore.state.playerId)) {
           // eslint-disable-next-line no-console
-          console.log('Current player is in the updated player list')
-          // Update the player's role
+          console.log('Player joined', { playerId })
+
+          break
+        }
+
+        case 'PLAYER_LEFT': {
+          const { playerId } = msg.data
+
+          // eslint-disable-next-line no-console
+          console.log('Player left', { playerId })
+
+          break
+        }
+
+        case 'GAME_STATE_CHANGE': {
+          const { state } = msg.data
+
+          // eslint-disable-next-line no-console
+          console.log('Game state changed', { state })
+
+          gameStore.setState((prev) => ({ ...prev, gameState: state }))
+
+          break
+        }
+
+        case 'HIDING_PHASE_START': {
+          const { duration } = msg.data
+
+          // eslint-disable-next-line no-console
+          console.log('Hiding phase started', { duration })
+
           gameStore.setState((prev) => ({
             ...prev,
-            role: players.find((p) => p.id === prev.playerId)?.role || '',
+            hidingPhaseEndTime: new Date(Date.now() + duration * 1000),
           }))
+
+          break
         }
 
-        gameStore.setState((prev) => ({
-          ...prev,
-          lobby: { ...prev.lobby, players },
-        }))
+        case 'PLAYER_POSITION': {
+          // Seekers position
+          const { lat, long } = msg.data
 
-        break
+          setSeekerLocation({ lat, long })
+          // eslint-disable-next-line no-console
+          console.log('Player position update', { lat, long })
+
+          break
+        }
+
+        case 'PLAYER_ACTION': {
+          const { action, data } = msg.data
+
+          switch (action) {
+            case 'ANSWER_QUESTION': {
+              const response = data as QuestionResponse
+              switch (response.type) {
+                case 'RADAR': {
+                  const radarResponse = response.data as RadarResponse
+                  const { radius } = radarResponse
+
+                  const radar = MapRadarMask({
+                    center: [playerLat, playerLong],
+                    radius,
+                    radarSuccess: radarResponse.hit,
+                  })
+
+                  setMapKids((prev) => [...prev, radar])
+
+                  break
+                }
+              }
+              break
+            }
+          }
+
+          // eslint-disable-next-line no-console
+          console.log('Player action received', { action, data })
+
+          break
+        }
+
+        case 'PLAYER_LIST_UPDATE': {
+          const { players } = msg.data
+
+          // eslint-disable-next-line no-console
+          console.log('Player list updated', { players })
+
+          if (players.find((p) => p.id === gameStore.state.playerId)) {
+            // eslint-disable-next-line no-console
+            console.log('Current player is in the updated player list')
+            // Update the player's role
+            gameStore.setState((prev) => ({
+              ...prev,
+              role: players.find((p) => p.id === prev.playerId)?.role || '',
+            }))
+          }
+
+          gameStore.setState((prev) => ({
+            ...prev,
+            lobby: { ...prev.lobby, players },
+          }))
+
+          break
+        }
       }
-    }
-  }, [])
+    },
+    [playerLat, playerLong],
+  )
 
   const handleClose = useCallback(() => {
     if (gameStore.state.gameState !== 'WAITING_FOR_PLAYERS') {
@@ -231,17 +239,6 @@ const Game = (): ReactElement => {
   const startGame = useCallback(async () => {
     await fetch(`http://${import.meta.env.VITE_API_URL}/lobby/${store.lobby.code}/start`, { method: 'POST' })
   }, [store.lobby.code])
-
-  if (loading) {
-    return <div>Loading location...</div>
-  }
-
-  if (error) {
-    return <div>Error loading location: {error.message}</div>
-  }
-
-  const playerLat = playerLocation?.lat ?? 51.5074
-  const playerLong = playerLocation?.long ?? -0.1278
 
   const endGame = useCallback(async () => {
     const res = await fetch(`http://${import.meta.env.VITE_API_URL}/lobby/${store.lobby.code}/end`, { method: 'POST' })
