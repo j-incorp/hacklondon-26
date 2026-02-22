@@ -1,11 +1,12 @@
 import { useStore } from '@tanstack/react-store'
-import { type ReactElement, useCallback, useEffect } from 'react'
+import { type ReactElement, useCallback, useEffect, useState } from 'react'
 import { useWebSocket } from 'react-use-websocket/dist/lib/use-websocket'
 
 import { useLocation } from '@/hooks/use-location'
 
+import { MainMap } from '../maps/main-map'
 import { gameStore } from './game-store'
-import type { Player } from './types'
+import type { Player, PlayerRole } from './types'
 import { message } from './types'
 
 const PlayerList = ({ players }: { players: Player[] }): ReactElement => (
@@ -21,6 +22,41 @@ const PlayerList = ({ players }: { players: Player[] }): ReactElement => (
     )}
   </ul>
 )
+
+const HidingOverlay = ({ endTime }: { endTime: Date }): ReactElement | null => {
+  const [secondsLeft, setSecondsLeft] = useState(() =>
+    Math.max(0, Math.ceil((endTime.getTime() - Date.now()) / 1000)),
+  )
+
+  useEffect(() => {
+    const tick = () => {
+      const remaining = Math.max(0, Math.ceil((endTime.getTime() - Date.now()) / 1000))
+
+      setSecondsLeft(remaining)
+    }
+
+    tick()
+
+    const id = window.setInterval(tick, 1000)
+
+    return () => window.clearInterval(id)
+  }, [endTime])
+
+  if (secondsLeft <= 0) {
+    return null
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+      <div className="text-center text-white">
+        <p className="text-2xl font-semibold">Hiding Phase</p>
+        <p className="text-8xl font-bold tabular-nums">
+          {String(Math.floor(secondsLeft / 60)).padStart(2, '0')}:{String(secondsLeft % 60).padStart(2, '0')}
+        </p>
+      </div>
+    </div>
+  )
+}
 
 const Game = (): ReactElement => {
   const store = useStore(gameStore, (state) => state)
@@ -48,7 +84,7 @@ const Game = (): ReactElement => {
 
             // eslint-disable-next-line no-console
             console.log('Player info received', { id, name, role })
-            gameStore.setState((prev) => ({ ...prev, playerId: id, role }))
+            gameStore.setState((prev) => ({ ...prev, playerId: id, role: role as PlayerRole }))
 
             break
           }
@@ -77,6 +113,8 @@ const Game = (): ReactElement => {
             // eslint-disable-next-line no-console
             console.log('Game state changed', { state })
 
+            gameStore.setState((prev) => ({ ...prev, gameState: state }))
+
             break
           }
 
@@ -85,6 +123,11 @@ const Game = (): ReactElement => {
 
             // eslint-disable-next-line no-console
             console.log('Hiding phase started', { duration })
+
+            gameStore.setState((prev) => ({
+              ...prev,
+              hidingPhaseEndTime: new Date(Date.now() + duration * 1000),
+            }))
 
             break
           }
@@ -112,6 +155,16 @@ const Game = (): ReactElement => {
 
             // eslint-disable-next-line no-console
             console.log('Player list updated', { players })
+
+            if (players.find((p) => p.id === store.playerId)) {
+              // eslint-disable-next-line no-console
+              console.log('Current player is in the updated player list')
+              // Update the player's role
+              gameStore.setState((prev) => ({
+                ...prev,
+                role: players.find((p) => p.id === prev.playerId)?.role || '',
+              }))
+            }
 
             gameStore.setState((prev) => ({
               ...prev,
@@ -157,16 +210,28 @@ const Game = (): ReactElement => {
 
   return (
     <div className="w-full h-full bg-gray-100">
-      <h1 className="text-4xl font-bold">Lobby {store.lobby.code}</h1>
-      <PlayerList players={store.lobby.players} />
-      {store.lobby.players?.length === 2 && (
-        <button
-          className="mx-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          onClick={startGame}
-          type="button"
-        >
-          Start Game
-        </button>
+      {store.gameState === 'HIDING' && <HidingOverlay endTime={store.hidingPhaseEndTime} />}
+      {store.gameState === 'WAITING_FOR_PLAYERS' ? (
+        <>
+          <h1 className="text-4xl font-bold">Lobby {store.lobby.code}</h1>
+          <PlayerList players={store.lobby.players} />
+          {store.lobby.players?.length === 2 && (
+            <button
+              className="mx-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              onClick={startGame}
+              type="button"
+            >
+              Start Game
+            </button>
+          )}
+        </>
+      ) : (
+      <div className="h-100">
+        <MainMap />
+        <p className="p-4 text-center text-lg font-semibold">
+          You are the <span className="uppercase">{store.role}</span>
+        </p>
+      </div>
       )}
     </div>
   )

@@ -9,6 +9,9 @@ interface GameStore extends Game {
 
 const initialState: GameStore = {
   playerId: '',
+  role: '',
+  gameState: 'WAITING_FOR_PLAYERS',
+  hidingPhaseEndTime: new Date(),
   lobby: {
     code: '',
     name: '',

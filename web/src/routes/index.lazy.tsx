@@ -25,9 +25,6 @@ const Page = () => {
       </HandProvider>
       <Location />
       <LobbyForms />
-      <div className="h-100">
-        <MainMap />
-      </div>
     </div>
   )
 }
