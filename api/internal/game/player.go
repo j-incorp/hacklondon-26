@@ -19,9 +19,9 @@ type Player struct {
 	Recv            chan []byte     `json:"-"`
 	mu              sync.Mutex
 	connected       bool
+	disconnected    bool
 	pendingMessages [][]byte
 	stopCh          chan struct{}
-	disconnectOnce  sync.Once
 }
 
 type Position struct {
@@ -74,33 +74,40 @@ func (p *Player) Disconnect() {
 }
 
 func (p *Player) DisconnectFrom(lobby *Lobby) {
-	p.disconnectOnce.Do(func() {
-		// Signal all goroutines for this session to stop.
-		close(p.stopCh)
+	p.mu.Lock()
+	if p.disconnected {
+		p.mu.Unlock()
+		return
+	}
+	p.disconnected = true
+	stopCh := p.stopCh
+	p.mu.Unlock()
 
-		if lobby.GetGameState() != WaitingForPlayers {
-			// The player needs to be able to rejoin later if something goes wrong
-			slog.Warn("Player lost connection during game", "playerId", p.Id)
-			p.mu.Lock()
-			p.connected = false
-			p.mu.Unlock()
-			p.Conn.Close()
-			return
-		}
-		err := lobby.LeaveLobby(p.Id)
-		if err != nil {
-			slog.Error("Failed to remove player from lobby", "playerId", p.Id, "error", err)
-		}
-		msg, err := json.Marshal(OutgoingMessage{Type: MessageTypePlayerLeft, Data: PlayerLeftMessage{p.Id}})
-		if err != nil {
-			slog.Error("Failed to marshal player left message", "playerId", p.Id, "error", err)
-			p.Disconnect()
-			return
-		}
-		lobby.broadcast(msg)
-		lobby.sendPlayerList()
+	// Signal all goroutines for this session to stop.
+	close(stopCh)
+
+	if lobby.GetGameState() != WaitingForPlayers {
+		// The player needs to be able to rejoin later if something goes wrong
+		slog.Warn("Player lost connection during game", "playerId", p.Id)
+		p.mu.Lock()
+		p.connected = false
+		p.mu.Unlock()
+		p.Conn.Close()
+		return
+	}
+	err := lobby.LeaveLobby(p.Id)
+	if err != nil {
+		slog.Error("Failed to remove player from lobby", "playerId", p.Id, "error", err)
+	}
+	msg, err := json.Marshal(OutgoingMessage{Type: MessageTypePlayerLeft, Data: PlayerLeftMessage{p.Id}})
+	if err != nil {
+		slog.Error("Failed to marshal player left message", "playerId", p.Id, "error", err)
 		p.Disconnect()
-	})
+		return
+	}
+	lobby.broadcast(msg)
+	lobby.sendPlayerList()
+	p.Disconnect()
 }
 
 // QueueMessage appends a message to the pending queue for delivery on reconnect.
@@ -125,7 +132,7 @@ func (p *Player) PrepareReconnect(conn *websocket.Conn) {
 	p.mu.Lock()
 	p.Conn = conn
 	p.connected = true
+	p.disconnected = false
 	p.stopCh = make(chan struct{})
-	p.disconnectOnce = sync.Once{}
 	p.mu.Unlock()
 }
