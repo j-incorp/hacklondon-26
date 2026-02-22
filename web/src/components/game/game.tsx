@@ -5,44 +5,15 @@ import { useWebSocket } from 'react-use-websocket/dist/lib/use-websocket'
 import { useLocation } from '@/hooks/use-location'
 import { Button } from '@/ui/button'
 
+import { HandProvider } from '../cards/hand-provider'
 import { MainMap } from '../maps/main-map'
+import { QuestionsProvider } from '../questions/questions-provider'
+import { Tools } from '../tools/tools'
 import { gameStore } from './game-store'
+import { HidingOverlay } from './hiding-overlay'
 import { PlayerList } from './player-list'
 import type { PlayerRole } from './types'
 import { message } from './types'
-
-const HidingOverlay = ({ endTime }: { endTime: Date }): ReactElement | null => {
-  const [secondsLeft, setSecondsLeft] = useState(() => Math.max(0, Math.ceil((endTime.getTime() - Date.now()) / 1000)))
-
-  useEffect(() => {
-    const tick = () => {
-      const remaining = Math.max(0, Math.ceil((endTime.getTime() - Date.now()) / 1000))
-
-      setSecondsLeft(remaining)
-    }
-
-    tick()
-
-    const id = window.setInterval(tick, 1000)
-
-    return () => window.clearInterval(id)
-  }, [endTime])
-
-  if (secondsLeft <= 0) {
-    return null
-  }
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-      <div className="text-center text-white">
-        <p className="text-2xl font-semibold">Hiding Phase</p>
-        <p className="text-8xl font-bold tabular-nums">
-          {String(Math.floor(secondsLeft / 60)).padStart(2, '0')}:{String(secondsLeft % 60).padStart(2, '0')}
-        </p>
-      </div>
-    </div>
-  )
-}
 
 const Game = (): ReactElement => {
   const store = useStore(gameStore, (state) => state)
@@ -227,11 +198,11 @@ const Game = (): ReactElement => {
   }, [store.lobby.code])
 
   return (
-    <div className="flex flex-col w-full h-full text-center justify-center items-center content-center pt-24">
+    <div className="flex flex-col w-full h-full text-center justify-center items-center content-center">
       {store.gameState === 'HIDING' && <HidingOverlay endTime={store.hidingPhaseEndTime} />}
       {store.gameState === 'WAITING_FOR_PLAYERS' ? (
         <>
-          <h1 className="text-4xl font-bold">Lobby {store.lobby.code}</h1>
+          <h1 className="text-4xl font-bold pt-24">Lobby {store.lobby.code}</h1>
           <PlayerList players={store.lobby.players} />
           {store.lobby.players?.length === 2 && (
             <Button className="" onClick={startGame} type="button">
@@ -240,11 +211,18 @@ const Game = (): ReactElement => {
           )}
         </>
       ) : (
-        <div className="h-100">
+        <div className="relative h-screen w-full">
           <MainMap />
-          <p className="p-4 text-center text-lg font-semibold">
+          <p className="pointer-events-none absolute left-0 top-0 w-full bg-black/50 p-3 text-center text-lg font-semibold text-white mt-2">
             You are the <span className="uppercase">{store.role}</span>
           </p>
+          <div className="absolute bottom-4 right-4 z-40">
+            <QuestionsProvider>
+              <HandProvider>
+                <Tools type={store.role} />
+              </HandProvider>
+            </QuestionsProvider>
+          </div>
         </div>
       )}
     </div>

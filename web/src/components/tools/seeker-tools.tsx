@@ -16,7 +16,6 @@ import {
 
 import { Matchings } from '../questions/matchings/matchings'
 import { Pictures } from '../questions/pictures/pictures'
-import { QuestionsProvider } from '../questions/questions-provider'
 import { Radars } from '../questions/radars/radars'
 
 const SeekerTools = (): ReactElement => {
@@ -82,52 +81,50 @@ const SeekerTools = (): ReactElement => {
   }
 
   return (
-    <QuestionsProvider>
-      <Drawer>
-        <DrawerTrigger asChild>
-          <Button
-            size="icon"
-            className="rounded-full bg-primary text-white hover:bg-orange-600 focus-visible:ring-orange-400"
-          >
-            <CircleQuestionMark className="size-6" />
-          </Button>
-        </DrawerTrigger>
-        <DrawerContent className="h-[70dvh] flex flex-col" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-          <DrawerHeader className="mb-4">
-            <DrawerTitle className="inline-flex items-center justify-center gap-2 mb-2">
-              <Toolbox className="size-5" />
-              Toolbox
-            </DrawerTitle>
-            <DrawerDescription>
-              Use these tools to find the hider! Click on a tool to get more information and use it.
-            </DrawerDescription>
-          </DrawerHeader>
-          <div
-            key={activeIndex}
-            className={`flex-1 overflow-y-auto animate-in fade-in duration-300 ${
-              direction === 'next' ? 'slide-in-from-right-6' : 'slide-in-from-left-6'
-            }`}
-          >
-            <div className="w-full justify-center text-center mx-auto">{questions[activeIndex]}</div>
+    <Drawer>
+      <DrawerTrigger asChild>
+        <Button
+          size="icon"
+          className="rounded-full bg-primary text-white hover:bg-orange-600 focus-visible:ring-orange-400"
+        >
+          <CircleQuestionMark className="size-6" />
+        </Button>
+      </DrawerTrigger>
+      <DrawerContent className="h-[70dvh] flex flex-col" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+        <DrawerHeader className="mb-4">
+          <DrawerTitle className="inline-flex items-center justify-center gap-2 mb-2">
+            <Toolbox className="size-5" />
+            Toolbox
+          </DrawerTitle>
+          <DrawerDescription>
+            Use these tools to find the hider! Click on a tool to get more information and use it.
+          </DrawerDescription>
+        </DrawerHeader>
+        <div
+          key={activeIndex}
+          className={`flex-1 overflow-y-auto animate-in fade-in duration-300 ${
+            direction === 'next' ? 'slide-in-from-right-6' : 'slide-in-from-left-6'
+          }`}
+        >
+          <div className="w-full justify-center text-center mx-auto">{questions[activeIndex]}</div>
+        </div>
+        <DrawerFooter className="h-auto">
+          <div className="flex items-center justify-center gap-2" aria-label="Question progress">
+            {isNonEmptyArray(questions)
+              ? questions.map((_, index) => (
+                  <span
+                    key={`question-dot-${index}`}
+                    className={`h-2 w-2 rounded-full transition-colors ${
+                      index === activeIndex ? 'bg-primary' : 'bg-muted-foreground/40'
+                    }`}
+                    aria-hidden="true"
+                  />
+                ))
+              : undefined}
           </div>
-          <DrawerFooter className="h-auto">
-            <div className="flex items-center justify-center gap-2" aria-label="Question progress">
-              {isNonEmptyArray(questions)
-                ? questions.map((_, index) => (
-                    <span
-                      key={`question-dot-${index}`}
-                      className={`h-2 w-2 rounded-full transition-colors ${
-                        index === activeIndex ? 'bg-primary' : 'bg-muted-foreground/40'
-                      }`}
-                      aria-hidden="true"
-                    />
-                  ))
-                : undefined}
-            </div>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
-    </QuestionsProvider>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   )
 }
 
