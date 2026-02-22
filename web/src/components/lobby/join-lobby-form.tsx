@@ -28,7 +28,7 @@ const JoinLobbyForm = (): ReactElement => {
           },
         }}
         children={(field) => (
-          <div className="mb-4">
+          <div className="mb-4 text-left">
             <label htmlFor={field.name} className="block mb-1.5">
               Lobby Code
             </label>
@@ -62,7 +62,7 @@ const JoinLobbyForm = (): ReactElement => {
           },
         }}
         children={(field) => (
-          <div className="mb-4">
+          <div className="mb-4 text-left">
             <label htmlFor={field.name} className="block mb-1.5">
               Name
             </label>
@@ -95,7 +95,7 @@ const JoinLobbyForm = (): ReactElement => {
           const isDisabled = !code || !name || !state.canSubmit || state.isSubmitting
 
           return (
-            <Button type="submit" variant="default" disabled={isDisabled}>
+            <Button type="submit" variant="default" disabled={isDisabled} className="">
               {state.isSubmitting ? 'Joining...' : 'Join Lobby'}
             </Button>
           )
