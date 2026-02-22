@@ -15,11 +15,13 @@ import { PlayerMarker } from './player-marker'
 const hattonCross = [51.46644304791559, -0.4234032595292248]
 
 interface MainMapProps {
-  center: [number, number]
+  lat: number
+  lng: number
   zoom: number
 }
 
-const MainMap = ({ center, zoom }: MainMapProps): ReactElement => {
+const MainMap = ({ lat, lng, zoom }: MainMapProps): ReactElement => {
+  const center: [number, number] = [lat, lng]
   // getTubeStopInfo(51.505, -0.09).then((info) => {
   //   console.log('Tube Stop Info:', info)
   // })
