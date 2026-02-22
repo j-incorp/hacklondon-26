@@ -15,53 +15,6 @@ import { PlayerList } from './player-list'
 import type { PlayerRole } from './types'
 import { message } from './types'
 
-const PlayerList = ({ players }: { players: Player[] }): ReactElement => (
-  <ul className="p-4 space-y-2">
-    {players ? (
-      players.map((p) => (
-        <li key={p.id} className="text-lg">
-          {p.name}
-        </li>
-      ))
-    ) : (
-      <li className="text-gray-500">No players yet</li>
-    )}
-  </ul>
-)
-
-const HidingOverlay = ({ endTime }: { endTime: Date }): ReactElement | null => {
-  const [secondsLeft, setSecondsLeft] = useState(() => Math.max(0, Math.ceil((endTime.getTime() - Date.now()) / 1000)))
-
-  useEffect(() => {
-    const tick = () => {
-      const remaining = Math.max(0, Math.ceil((endTime.getTime() - Date.now()) / 1000))
-
-      setSecondsLeft(remaining)
-    }
-
-    tick()
-
-    const id = window.setInterval(tick, 1000)
-
-    return () => window.clearInterval(id)
-  }, [endTime])
-
-  if (secondsLeft <= 0) {
-    return null
-  }
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-      <div className="text-center text-white">
-        <p className="text-2xl font-semibold">Hiding Phase</p>
-        <p className="text-8xl font-bold tabular-nums">
-          {String(Math.floor(secondsLeft / 60)).padStart(2, '0')}:{String(secondsLeft % 60).padStart(2, '0')}
-        </p>
-      </div>
-    </div>
-  )
-}
-
 const Game = (): ReactElement => {
   const store = useStore(gameStore, (state) => state)
 
