@@ -48,7 +48,7 @@ const MainMap = ({ lat, lng, seekerLat, seekerLng, zoom, children }: MainMapProp
 
       {/* <TubeLineMask lineName="Piccadilly" lineSuccess={true} color="blue" /> */}
       <PlayerMarker lat={lat} lng={lng} color="#000000" />
-      {seekerLat && seekerLng && <PlayerMarker lat={seekerLat} lng={seekerLng} seekerMarker color="#f54900" />}
+      {seekerLat && seekerLng && <PlayerMarker lat={seekerLat} lng={seekerLng} color="#f54900" />}
       {children}
     </MapContainer>
   )

@@ -17,10 +17,9 @@ import { gameStore } from './game-store'
 import { HidingOverlay } from './hiding-overlay'
 import { PlayerList } from './player-list'
 import type {
-  PictureQuestion,
+  // PictureQuestion,
   PlayerRole,
-  QuestionRequest,
-  QuestionResponse,
+  // QuestionRequest,
   QuestionResponse,
   RadarResponse,
 } from './types'
@@ -239,8 +238,8 @@ const Game = (): ReactElement => {
       sendJsonMessage({
         type: 'PLAYER_POSITION',
         data: {
-          lat: location.lat,
-          long: location.long,
+          lat: playerLocation?.lat,
+          long: playerLocation?.long,
         },
       })
     }, 10_000)
