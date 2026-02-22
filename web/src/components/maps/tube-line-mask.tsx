@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { circle } from '@turf/circle'
 import difference from '@turf/difference'
 import { featureCollection, polygon } from '@turf/helpers'

@@ -1,18 +1,17 @@
 import {
   Building,
   Building2,
-  Camera,
-  CloudSun,
-  RailSymbol,
-  Waves,
-  PaintbrushVertical,
   BusFront,
-  Pyramid,
-  Landmark,
-  Signpost,
+  Camera,
   Church,
-  PersonStanding,
   Clock,
+  CloudSun,
+  PaintbrushVertical,
+  PersonStanding,
+  Pyramid,
+  RailSymbol,
+  Signpost,
+  Waves,
 } from 'lucide-react'
 import { type ReactElement } from 'react'
 
