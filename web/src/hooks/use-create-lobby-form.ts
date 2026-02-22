@@ -19,7 +19,7 @@ const useCreateLobbyForm = () => {
       // eslint-disable-next-line no-console
       console.log('Submitted value:', value)
 
-      const response = await fetch(`${import.meta.env.VITE_HTTP_PREFIX} ://${import.meta.env.VITE_API_URL}/lobby`, {
+      const response = await fetch(`${import.meta.env.VITE_HTTP_PREFIX}://${import.meta.env.VITE_API_URL}/lobby`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
