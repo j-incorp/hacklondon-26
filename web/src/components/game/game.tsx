@@ -5,7 +5,10 @@ import { useWebSocket } from 'react-use-websocket/dist/lib/use-websocket'
 import { useLocation } from '@/hooks/use-location'
 import { Button } from '@/ui/button'
 
+import { PictureAlert } from '../alert/picture-alert'
+import { QuestionAlert } from '../alert/question-alert'
 import { HandProvider } from '../cards/hand-provider'
+import { handStore } from '../cards/hand-store'
 import { MainMap } from '../maps/main-map'
 import { MapRadarMask } from '../maps/map-radar-mask'
 import { QuestionsProvider } from '../questions/questions-provider'
@@ -13,7 +16,14 @@ import { Tools } from '../tools/tools'
 import { gameStore } from './game-store'
 import { HidingOverlay } from './hiding-overlay'
 import { PlayerList } from './player-list'
-import type { PlayerRole, QuestionResponse, RadarResponse } from './types'
+import type {
+  PictureQuestion,
+  PlayerRole,
+  QuestionRequest,
+  QuestionResponse,
+  QuestionResponse,
+  RadarResponse,
+} from './types'
 import { message } from './types'
 
 const formatDuration = (totalSeconds: number): string => {
@@ -23,6 +33,8 @@ const formatDuration = (totalSeconds: number): string => {
 }
 
 const Game = (): ReactElement => {
+  const hStore = useStore(handStore, (state) => state)
+
   const store = useStore(gameStore, (state) => state)
 
   const [disconnected, setDisconnected] = useState(false)
@@ -245,9 +257,17 @@ const Game = (): ReactElement => {
     if (res.ok) {
       const { duration } = (await res.json()) as { duration: number }
 
-      setGameDuration(formatDuration(duration))
+      let addTime = 0
+
+      hStore.cards
+        .filter((card) => card.type === 'time-bonus')
+        .forEach((card) => {
+          addTime += card.amount * 60
+        })
+
+      setGameDuration(formatDuration(duration + addTime))
     }
-  }, [store.lobby.code])
+  }, [store.lobby.code, hStore])
 
   return (
     <div className="flex flex-col w-full h-full text-center justify-center items-center content-center">
@@ -264,6 +284,47 @@ const Game = (): ReactElement => {
         </>
       ) : (
         <div className="relative h-screen w-full">
+          <PictureAlert
+            question={store.currentPictureQuestion}
+            onCapture={async (file: File) => {
+              const { type, size } = file
+              const url = await fetch(`http://${import.meta.env.VITE_API_URL}/upload`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  filetype: type,
+                  size,
+                }),
+              })
+
+              const resp = await url.json()
+              const { url: uploadUrl, key } = resp as { url: string; key: string }
+
+              await fetch(uploadUrl, {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': type,
+                },
+                body: file,
+              })
+
+              sendJsonMessage({
+                type: 'PLAYER_ACTION',
+                data: {
+                  action: 'ANSWER_QUESTION',
+                  data: {
+                    type: 'PICTURE',
+                    data: {
+                      pictureUrl: 'd1bxoywow59vkr.cloudfront.net/' + key,
+                    },
+                  },
+                },
+              })
+            }}
+          />
+          <QuestionAlert question={store.currentQuestion}></QuestionAlert>
           <MainMap
             lat={playerLat}
             lng={playerLong}
