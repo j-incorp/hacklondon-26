@@ -309,11 +309,11 @@ const Game = (): ReactElement => {
   }, [sendJsonMessage, store.lobby.code, playerLocation])
 
   const startGame = useCallback(async () => {
-    await fetch(`http://${import.meta.env.VITE_API_URL}/lobby/${store.lobby.code}/start`, { method: 'POST' })
+    await fetch(`${import.meta.env.VITE_HTTP_PREFIX}://${import.meta.env.VITE_API_URL}/lobby/${store.lobby.code}/start`, { method: 'POST' })
   }, [store.lobby.code])
 
   const endGame = useCallback(async () => {
-    const res = await fetch(`http://${import.meta.env.VITE_API_URL}/lobby/${store.lobby.code}/end`, { method: 'POST' })
+    const res = await fetch(`${import.meta.env.VITE_HTTP_PREFIX}://${import.meta.env.VITE_API_URL}/lobby/${store.lobby.code}/end`, { method: 'POST' })
     if (res.ok) {
       const { duration } = (await res.json()) as { duration: number }
 
@@ -348,7 +348,7 @@ const Game = (): ReactElement => {
             question={store.currentPictureQuestion}
             onCapture={async (file: File) => {
               const { type, size } = file
-              const url = await fetch(`http://${import.meta.env.VITE_API_URL}/upload`, {
+              const url = await fetch(`${import.meta.env.VITE_HTTP_PREFIX}://${import.meta.env.VITE_API_URL}/upload`, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
