@@ -7,6 +7,7 @@ import { Location } from '@/components/location/location'
 import { MainMap } from '@/components/maps/main-map'
 import { Tools } from '@/components/tools/tools'
 import { useImageUpload } from '@/hooks/use-image-upload'
+import { useLocation } from '@/hooks/use-location'
 
 const Page = () => {
   const uploadImage = useImageUpload()
@@ -14,7 +15,9 @@ const Page = () => {
   const handleCapture = async (file: File) => {
     await uploadImage(file)
   }
-
+  const { location } = useLocation()
+  const lat = location?.latitude ?? 51.505
+  const long = location?.longitude ?? -0.09
   return (
     <div className="p-2">
       <h3>Welcome Home!</h3>
@@ -26,7 +29,7 @@ const Page = () => {
       <Location />
       <LobbyForms />
       <div className="h-100">
-        <MainMap lat={51.505} lng={-0.09} zoom={11} />
+        <MainMap lat={lat} lng={long} zoom={9} />
       </div>
     </div>
   )

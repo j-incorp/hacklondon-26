@@ -17,10 +17,12 @@ const hattonCross = [51.46644304791559, -0.4234032595292248]
 interface MainMapProps {
   lat: number
   lng: number
+  seekerLat?: number
+  seekerLng?: number
   zoom: number
 }
 
-const MainMap = ({ lat, lng, zoom }: MainMapProps): ReactElement => {
+const MainMap = ({ lat, lng, seekerLat, seekerLng, zoom }: MainMapProps): ReactElement => {
   const center: [number, number] = [lat, lng]
   // getTubeStopInfo(51.505, -0.09).then((info) => {
   //   console.log('Tube Stop Info:', info)
@@ -31,7 +33,13 @@ const MainMap = ({ lat, lng, zoom }: MainMapProps): ReactElement => {
   console.log('Borough:', borough)
 
   return (
-    <MapContainer center={center} zoom={zoom} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
+    <MapContainer
+      center={center}
+      zoom={zoom}
+      scrollWheelZoom={false}
+      zoomControl={false}
+      style={{ height: '100%', width: '100%' }}
+    >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
         url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
@@ -45,7 +53,8 @@ const MainMap = ({ lat, lng, zoom }: MainMapProps): ReactElement => {
       {/* <MapRadarMask center={[51.505, -0.09]} radius={10000} radarSuccess={true} /> */}
 
       {/* <TubeLineMask lineName="Piccadilly" lineSuccess={true} color="blue" /> */}
-      <PlayerMarker lat={51.605} lng={-0.09} color="#000000" />
+      <PlayerMarker lat={lat} lng={lng} color="#000000" />
+      {seekerLat && seekerLng && <PlayerMarker lat={seekerLat} lng={seekerLng} color="#f54900" />}
     </MapContainer>
   )
 }
