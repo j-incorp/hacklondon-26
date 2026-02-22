@@ -24,9 +24,7 @@ const PlayerList = ({ players }: { players: Player[] }): ReactElement => (
 )
 
 const HidingOverlay = ({ endTime }: { endTime: Date }): ReactElement | null => {
-  const [secondsLeft, setSecondsLeft] = useState(() =>
-    Math.max(0, Math.ceil((endTime.getTime() - Date.now()) / 1000)),
-  )
+  const [secondsLeft, setSecondsLeft] = useState(() => Math.max(0, Math.ceil((endTime.getTime() - Date.now()) / 1000)))
 
   useEffect(() => {
     const tick = () => {
@@ -226,12 +224,12 @@ const Game = (): ReactElement => {
           )}
         </>
       ) : (
-      <div className="h-100">
-        <MainMap />
-        <p className="p-4 text-center text-lg font-semibold">
-          You are the <span className="uppercase">{store.role}</span>
-        </p>
-      </div>
+        <div className="h-100">
+          <MainMap lat={51.505} lng={-0.09} zoom={11} />
+          <p className="p-4 text-center text-lg font-semibold">
+            You are the <span className="uppercase">{store.role}</span>
+          </p>
+        </div>
       )}
     </div>
   )

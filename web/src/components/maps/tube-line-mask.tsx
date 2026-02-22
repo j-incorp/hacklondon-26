@@ -22,7 +22,7 @@ const TubeLineMask = ({ lineName, lineSuccess = false, color = 'black' }: TubeLi
     void getTubeStationsByLine(lineName.toLowerCase()).then(setStations)
   }, [lineName])
 
-  const stationCentroids = stations.map((station) => [station.lat, station.lng])
+  const stationCentroids = stations.map((station): [number, number] => [station.lat, station.lng])
 
   if (lineSuccess) {
     const londonBoundaryPolygon = polygon(londonBoundary?.geometry.coordinates as [number, number][][])
@@ -37,7 +37,7 @@ const TubeLineMask = ({ lineName, lineSuccess = false, color = 'black' }: TubeLi
     }
 
     // Union all cutouts into one shape first
-    const combinedCutout = cutouts.reduce((acc, cutout) => {
+    const combinedCutout = cutouts.reduce((acc, cutout): any => {
       if (!acc) {
         return cutout
       }

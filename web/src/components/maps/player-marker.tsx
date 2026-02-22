@@ -52,6 +52,9 @@ const PlayerMarker = ({ lat, lng, color = '#f54900' }: PlayerMarkerProps): React
   const map = useMap()
 
   useEffect(() => {
+    if (!lat || !lng) {
+      return
+    }
     if (markerRef.current) {
       markerRef.current.setLatLng([lat, lng])
       map.panTo([lat, lng])
