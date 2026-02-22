@@ -1,5 +1,6 @@
 import { type ReactElement } from 'react'
 
+import { defaultPosition } from '@/components/types'
 import { useLocation } from '@/hooks/use-location'
 import { useQuestions } from '@/hooks/use-questions'
 import { isDefined } from '@/lib/is/is-defined'
@@ -21,7 +22,7 @@ const Picture = ({ title, icon, type }: PictureProps): ReactElement => {
   const handleClick = () => {
     askQuestion({
       type: 'PICTURE',
-      position: location,
+      position: location ?? defaultPosition,
       data: {
         type,
       },
@@ -30,7 +31,7 @@ const Picture = ({ title, icon, type }: PictureProps): ReactElement => {
 
   const isDisabled = hasQuestionBeenAsked({
     type: 'PICTURE',
-    position: location,
+    position: location ?? defaultPosition,
     data: {
       type,
     },

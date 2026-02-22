@@ -21,9 +21,9 @@ const playerAction = z.enum(['ASK_QUESTION', 'ANSWER_QUESTION', 'VETO_QUESTION',
 
 const questionType = z.enum(['RADAR', 'PICTURE', 'MATCHING'])
 
-const pictureType = z.enum(['tallest building', 'nearest large body of water', 'pavement'])
+const pictureType = z.enum(['five-buildings', 'tallest-building', 'train-station', 'body-of-water', 'sky'])
 
-const matchingType = z.enum(['nearest tube line', 'nearest hospital', 'nearest airport'])
+const matchingType = z.enum(['tube-line', 'london-borough'])
 
 const curseType = z.enum(['ORANGE'])
 
