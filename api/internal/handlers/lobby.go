@@ -42,7 +42,7 @@ func (s *Server) JoinLobby(c *gin.Context) {
 		return
 	}
 
-	player := game.NewPlayer("Player", wsConn)
+	player := game.NewPlayer(c.Query("name"), wsConn)
 	if err := lobby.AddPlayer(player); err != nil {
 		slog.Debug("Lobby is full", "code", code)
 		player.Disconnect()

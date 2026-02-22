@@ -19,9 +19,9 @@ const Radar = ({ size }: RadarProps): ReactElement => {
     }
 
     askQuestion({
-      type: 'radar',
+      type: 'RADAR',
+      position: location,
       data: {
-        position: location,
         radius: size,
       },
     })
@@ -30,9 +30,9 @@ const Radar = ({ size }: RadarProps): ReactElement => {
   const isDisabled =
     !location ||
     hasQuestionBeenAsked({
-      type: 'radar',
+      type: 'RADAR',
+      position: location ?? defaultLocation,
       data: {
-        position: location ?? defaultLocation,
         radius: size,
       },
     })
