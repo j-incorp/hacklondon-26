@@ -3,27 +3,20 @@ import { type ReactElement, useCallback, useEffect, useState } from 'react'
 import { useWebSocket } from 'react-use-websocket/dist/lib/use-websocket'
 
 import { useLocation } from '@/hooks/use-location'
+import { useQuestions } from '@/hooks/use-questions'
 import { Button } from '@/ui/button'
 
 import { PictureAlert } from '../alert/picture-alert'
 import { QuestionAlert } from '../alert/question-alert'
-import { HandProvider } from '../cards/hand-provider'
 import { handStore } from '../cards/hand-store'
 import { MainMap } from '../maps/main-map'
 import { MapRadarMask } from '../maps/map-radar-mask'
-import { QuestionsProvider } from '../questions/questions-provider'
 import { Gallery } from '../tools/gallery'
 import { Tools } from '../tools/tools'
 import { gameStore } from './game-store'
 import { HidingOverlay } from './hiding-overlay'
 import { PlayerList } from './player-list'
-import type {
-  // PictureQuestion,
-  PlayerRole,
-  // QuestionRequest,
-  QuestionResponse,
-  RadarResponse,
-} from './types'
+import type { PictureQuestion, PlayerRole, QuestionRequest, QuestionResponse, RadarResponse } from './types'
 import { message } from './types'
 
 const formatDuration = (totalSeconds: number): string => {
@@ -38,14 +31,20 @@ const Game = (): ReactElement => {
   const store = useStore(gameStore, (state) => state)
 
   const [disconnected, setDisconnected] = useState(false)
+
   const [gameDuration, setGameDuration] = useState<string | null>(null)
+
   const [mapKids, setMapKids] = useState<ReactElement[]>([])
 
   const { location: playerLocation } = useLocation()
 
   const playerLat = playerLocation?.lat ?? 51.5074
+
   const playerLong = playerLocation?.long ?? -0.1278
+
   const [seekerLocation, setSeekerLocation] = useState<{ lat: number; long: number }>()
+
+  const { addResponse } = useQuestions()
 
   const joinUrl = disconnected
     ? null
@@ -141,6 +140,9 @@ const Game = (): ReactElement => {
           switch (action) {
             case 'ANSWER_QUESTION': {
               const response = data as QuestionResponse
+
+              addResponse(response)
+
               switch (response.type) {
                 case 'RADAR': {
                   const radarResponse = response.data as RadarResponse
@@ -163,6 +165,54 @@ const Game = (): ReactElement => {
 
           // eslint-disable-next-line no-console
           console.log('Player action received', { action, data })
+
+          switch (action) {
+            case 'ASK_QUESTION':
+              const { type, data: qData } = data as QuestionRequest
+              switch (type) {
+                case 'RADAR':
+                  break
+                case 'PICTURE':
+                  const pData = qData as PictureQuestion
+
+                  gameStore.setState((prev) => ({
+                    ...prev,
+                    currentPictureQuestion: {
+                      ...pData,
+                    },
+                  }))
+
+                  break
+                case 'MATCHING':
+                  // eslint-disable-next-line no-console
+                  console.log('Received question request', { type })
+
+                  break
+                default:
+                  // eslint-disable-next-line no-console
+                  console.warn('Received unknown question type', { type })
+              }
+              break
+            case 'ANSWER_QUESTION':
+              const { type: answerType, data: answerData } = data as QuestionResponse
+
+              gameStore.setState((prev) => ({
+                ...prev,
+                currentQuestion: {
+                  type: answerType,
+                  data: answerData,
+                },
+              }))
+
+              break
+            case 'VETO_QUESTION':
+              break
+            case 'SEND_CURSE':
+              break
+            default:
+              // eslint-disable-next-line no-console
+              console.warn('Received unknown player action', { action, data })
+          }
 
           break
         }
@@ -192,7 +242,7 @@ const Game = (): ReactElement => {
         }
       }
     },
-    [playerLat, playerLong],
+    [playerLat, playerLong, addResponse],
   )
 
   const handleClose = useCallback(() => {
@@ -358,18 +408,14 @@ const Game = (): ReactElement => {
               <p className="text-3xl font-bold mt-1">{gameDuration}</p>
             </div>
           )}
-          <QuestionsProvider>
-            <HandProvider>
-              <div className="absolute bottom-4 right-4 z-40">
-                <Tools type={store.role} />
-              </div>
-              {store.role === 'SEEKER' ? (
-                <div className="absolute bottom-4 left-4 z-40">
-                  <Gallery />
-                </div>
-              ) : undefined}
-            </HandProvider>
-          </QuestionsProvider>
+          <div className="absolute bottom-4 right-4 z-40">
+            <Tools type={store.role} />
+          </div>
+          {store.role === 'SEEKER' ? (
+            <div className="absolute bottom-4 left-4 z-40">
+              <Gallery />
+            </div>
+          ) : undefined}
         </div>
       )}
     </div>
