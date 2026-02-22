@@ -7,6 +7,7 @@ import { Button } from '@/ui/button'
 
 import { HandProvider } from '../cards/hand-provider'
 import { MainMap } from '../maps/main-map'
+import { MapRadarMask } from '../maps/map-radar-mask'
 import { QuestionsProvider } from '../questions/questions-provider'
 import { Tools } from '../tools/tools'
 import { gameStore } from './game-store'
@@ -14,8 +15,6 @@ import { HidingOverlay } from './hiding-overlay'
 import { PlayerList } from './player-list'
 import type { PlayerRole, QuestionResponse, RadarResponse } from './types'
 import { message } from './types'
-import { MapRadarMask } from '../maps/map-radar-mask'
-import { set } from 'zod'
 
 const Game = (): ReactElement => {
   const store = useStore(gameStore, (state) => state)
@@ -24,20 +23,8 @@ const Game = (): ReactElement => {
 
   const [mapKids, setMapKids] = useState<ReactElement[]>([])
 
-  const { playerLocation, loading, error } = useLocation()
-
-  if (loading) {
-    return <div>Loading location...</div>
-  }
-
-  if (error) {
-    return <div>Error loading location: {error.message}</div>
-  }
-
-  const playerLat = playerLocation?.lat ?? 51.5074
-  const playerLong = playerLocation?.long ?? -0.1278
-
-  const [seekerLocation, setSeekerLocation] = useState<{ lat: number; long: number } | null>(null)
+  const { location: playerLocation, loading, error } = useLocation()
+  const [seekerLocation, setSeekerLocation] = useState<{ lat: number; long: number }>()
 
   const joinUrl = disconnected
     ? null
@@ -134,7 +121,6 @@ const Game = (): ReactElement => {
               case 'RADAR': {
                 const radarResponse = response.data as RadarResponse
                 const { radius } = radarResponse
-                // eslint-disable-next-line no-console
 
                 console.log('Radar question answered', { playerLat, playerLong, radius })
 
@@ -237,6 +223,17 @@ const Game = (): ReactElement => {
   const startGame = useCallback(async () => {
     await fetch(`http://${import.meta.env.VITE_API_URL}/lobby/${store.lobby.code}/start`, { method: 'POST' })
   }, [store.lobby.code])
+
+  if (loading) {
+    return <div>Loading location...</div>
+  }
+
+  if (error) {
+    return <div>Error loading location: {error.message}</div>
+  }
+
+  const playerLat = playerLocation?.lat ?? 51.5074
+  const playerLong = playerLocation?.long ?? -0.1278
 
   return (
     <div className="flex flex-col w-full h-full text-center justify-center items-center content-center">

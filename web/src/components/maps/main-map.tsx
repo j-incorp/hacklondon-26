@@ -1,18 +1,15 @@
-/* eslint-disable no-console */
 import { type Feature, type MultiPolygon, type Polygon } from 'geojson'
 import { type ReactElement } from 'react'
 import { MapContainer, TileLayer } from 'react-leaflet'
 import { GeoJSON } from 'react-leaflet'
 
 import londonMask from '@/components/maps/consts/london-boundary.json'
-// import { getLondonBorough } from '@/lib/geo/geo-utils'
 
+// import { getLondonBorough } from '@/lib/geo/geo-utils'
 // import { MapRadarMask } from './map-radar-mask'
 // import { BoroughMask } from './borough-mask'
 import { PlayerMarker } from './player-marker'
 // import { TubeLineMask } from './tube-line-mask'
-
-const hattonCross = [51.46644304791559, -0.4234032595292248]
 
 interface MainMapProps {
   lat: number
@@ -34,7 +31,7 @@ const MainMap = ({ lat, lng, seekerLat, seekerLng, zoom, children }: MainMapProp
       center={center}
       zoom={zoom}
       scrollWheelZoom={false}
-      zoomControl={true}
+      zoomControl
       style={{ height: '100%', width: '100%' }}
     >
       <TileLayer
@@ -51,7 +48,7 @@ const MainMap = ({ lat, lng, seekerLat, seekerLng, zoom, children }: MainMapProp
 
       {/* <TubeLineMask lineName="Piccadilly" lineSuccess={true} color="blue" /> */}
       <PlayerMarker lat={lat} lng={lng} color="#000000" />
-      {seekerLat && seekerLng && <PlayerMarker lat={seekerLat} lng={seekerLng} seekerMarker={true} color="#f54900" />}
+      {seekerLat && seekerLng && <PlayerMarker lat={seekerLat} lng={seekerLng} seekerMarker color="#f54900" />}
       {children}
     </MapContainer>
   )
