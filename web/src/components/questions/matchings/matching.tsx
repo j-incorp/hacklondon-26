@@ -1,5 +1,6 @@
 import { type ReactElement } from 'react'
 
+import { defaultPosition } from '@/components/types'
 import { useLocation } from '@/hooks/use-location'
 import { useQuestions } from '@/hooks/use-questions'
 import { isDefined } from '@/lib/is/is-defined'
@@ -22,7 +23,7 @@ const Matching = ({ title, icon, type }: MatchingProps): ReactElement => {
   const handleClick = () => {
     askQuestion({
       type: 'MATCHING',
-      position: location,
+      position: location ?? defaultPosition,
       data: {
         type,
       },
@@ -31,7 +32,7 @@ const Matching = ({ title, icon, type }: MatchingProps): ReactElement => {
 
   const isDisabled = hasQuestionBeenAsked({
     type: 'MATCHING',
-    position: location,
+    position: location ?? defaultPosition,
     data: {
       type,
     },

@@ -15,7 +15,7 @@ const Location = (): ReactElement => {
 
   return (
     <div>
-      lat: {location?.latitude} long: {location?.longitude}
+      lat: {location?.lat} long: {location?.long}
     </div>
   )
 }

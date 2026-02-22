@@ -1,6 +1,6 @@
 import { type ReactElement } from 'react'
 
-import { defaultLocation } from '@/components/types'
+import { defaultPosition } from '@/components/types'
 import { useLocation } from '@/hooks/use-location'
 import { useQuestions } from '@/hooks/use-questions'
 import { Button } from '@/ui/button'
@@ -20,7 +20,7 @@ const Radar = ({ size }: RadarProps): ReactElement => {
 
     askQuestion({
       type: 'RADAR',
-      position: location,
+      position: location ?? defaultPosition,
       data: {
         radius: size,
       },
@@ -31,7 +31,7 @@ const Radar = ({ size }: RadarProps): ReactElement => {
     !location ||
     hasQuestionBeenAsked({
       type: 'RADAR',
-      position: location ?? defaultLocation,
+      position: location ?? defaultPosition,
       data: {
         radius: size,
       },
