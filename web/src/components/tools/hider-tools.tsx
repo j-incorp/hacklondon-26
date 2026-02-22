@@ -28,6 +28,7 @@ const HiderTools = (): ReactElement => {
   const totalPages = Math.ceil(cards.length / CARDS_PER_PAGE)
 
   const [activePage, setActivePage] = useState(0)
+
   const [direction, setDirection] = useState<'next' | 'prev'>('next')
 
   const touch = useRef<number | null>(null)
