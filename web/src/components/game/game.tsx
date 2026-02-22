@@ -9,6 +9,7 @@ import { HandProvider } from '../cards/hand-provider'
 import { handStore } from '../cards/hand-store'
 import { MainMap } from '../maps/main-map'
 import { QuestionsProvider } from '../questions/questions-provider'
+import { Gallery } from '../tools/gallery'
 import { Tools } from '../tools/tools'
 import { gameStore } from './game-store'
 import { HidingOverlay } from './hiding-overlay'
@@ -264,13 +265,18 @@ const Game = (): ReactElement => {
               <p className="text-3xl font-bold mt-1">{gameDuration}</p>
             </div>
           )}
-          <div className="absolute bottom-4 right-4 z-40">
-            <QuestionsProvider>
-              <HandProvider>
+          <QuestionsProvider>
+            <HandProvider>
+              <div className="absolute bottom-4 right-4 z-40">
                 <Tools type={store.role} />
-              </HandProvider>
-            </QuestionsProvider>
-          </div>
+              </div>
+              {store.role === 'SEEKER' ? (
+                <div className="absolute bottom-4 left-4 z-40">
+                  <Gallery />
+                </div>
+              ) : undefined}
+            </HandProvider>
+          </QuestionsProvider>
         </div>
       )}
     </div>
