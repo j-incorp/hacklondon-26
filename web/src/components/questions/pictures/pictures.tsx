@@ -1,4 +1,18 @@
-import { Building, Building2, Camera, CloudSun, RailSymbol, Waves } from 'lucide-react'
+import {
+  Building,
+  Building2,
+  BusFront,
+  Camera,
+  Church,
+  Clock,
+  CloudSun,
+  PaintbrushVertical,
+  PersonStanding,
+  Pyramid,
+  RailSymbol,
+  Signpost,
+  Waves,
+} from 'lucide-react'
 import { type ReactElement } from 'react'
 
 import { QuestionSelection } from '../question-selection'
@@ -48,6 +62,48 @@ const Pictures = ({ className }: PicturesProps): ReactElement => {
           description="Take a picture of the sky"
           icon={<CloudSun className="size-8" />}
           type="sky"
+        />
+        <Picture
+          title="Street art"
+          description="Take a picture of street art"
+          icon={<PaintbrushVertical className="size-8" />}
+          type="street-art"
+        />
+        <Picture
+          title="Bus Route Number"
+          description="Take a picture of a bus with a route number on it (Hide route name)"
+          icon={<BusFront className="size-8" />}
+          type="bus-route-number"
+        />
+        <Picture
+          title="Street Sign"
+          description="Take a picture of a street sign (Blur out the street name)"
+          icon={<Signpost className="size-8" />}
+          type="street-sign"
+        />
+        <Picture
+          title="Monument Shadow"
+          description="Take a picture of a piece of public art (e.g. statue, sculpture, mural)"
+          icon={<Pyramid className="size-8" />}
+          type="monument-shadow"
+        />
+        <Picture
+          title="Strava Map"
+          description="Take a picture of a Strava map (take at least 6 turns around your hiding zone)"
+          icon={<PersonStanding className="size-8" />}
+          type="strava-map"
+        />
+        <Picture
+          title="Church"
+          description="Take a picture of the nearest church/cathedral"
+          icon={<Church className="size-8" />}
+          type="church"
+        />
+        <Picture
+          title="Clock"
+          description="Take a picture of the biggest clock in your hiding zone"
+          icon={<Clock className="size-8" />}
+          type="clock"
         />
       </QuestionSelection>
     </div>

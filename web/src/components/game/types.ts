@@ -21,7 +21,23 @@ const playerAction = z.enum(['ASK_QUESTION', 'ANSWER_QUESTION', 'VETO_QUESTION',
 
 const questionType = z.enum(['RADAR', 'PICTURE', 'MATCHING'])
 
-const pictureType = z.enum(['five-buildings', 'tallest-building', 'train-station', 'body-of-water', 'sky'])
+const pictureType = z.enum([
+  'five-buildings',
+  'tallest-building',
+  'train-station',
+  'body-of-water',
+  'sky',
+  'street-sign',
+  'clock',
+  'person-standing',
+  'pyramid',
+  'paintbrush',
+  'bus-route-number',
+  'street-art',
+  'church',
+  'strava-map',
+  'monument-shadow',
+])
 
 const matchingType = z.enum(['tube-line', 'london-borough'])
 

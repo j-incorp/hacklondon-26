@@ -12,9 +12,10 @@ interface MapRadarMaskProps {
   center: [number, number] // Joe change to type Position
   radius: number // in meters
   radarSuccess?: boolean
+  color?: string
 }
 
-const MapRadarMask = ({ center, radius, radarSuccess = false }: MapRadarMaskProps): ReactElement => {
+const MapRadarMask = ({ center, radius, radarSuccess = false, color = 'black' }: MapRadarMaskProps): ReactElement => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const londonBoundaryPolygon = polygon((londonBoundary?.geometry.coordinates as any) ?? [])
 
@@ -29,12 +30,12 @@ const MapRadarMask = ({ center, radius, radarSuccess = false }: MapRadarMaskProp
       <GeoJSON
         key={`${center[0]}-${center[1]}-${radius}`}
         data={mask}
-        style={{ fillColor: 'black', fillOpacity: 0.5, color: 'transparent', weight: 0 }}
+        style={{ fillColor: 'black', fillOpacity: 0.5, color: color, weight: 1.5 }}
         filter={(feature) => feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon'}
       />
     )
   } else {
-    return <MapCircle center={center} radius={radius} />
+    return <MapCircle center={center} radius={radius} color={color} />
   }
 }
 

@@ -212,7 +212,7 @@ const Game = (): ReactElement => {
         </>
       ) : (
         <div className="relative h-screen w-full">
-          <MainMap />
+          <MainMap lat={51.505} lng={-0.09} zoom={11} />
           <p className="pointer-events-none absolute left-0 top-0 w-full bg-black/50 p-3 text-center text-lg font-semibold text-white mt-2">
             You are the <span className="uppercase">{store.role}</span>
           </p>
