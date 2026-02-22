@@ -1,12 +1,11 @@
 import { type ReactElement } from 'react'
 
-import { defaultLocation } from '@/components/types'
 import { useLocation } from '@/hooks/use-location'
 import { useQuestions } from '@/hooks/use-questions'
 import { isDefined } from '@/lib/is/is-defined'
 import { Button } from '@/ui/button'
 
-import type { MatchingType } from './types'
+import type { MatchingType } from '../../game/types'
 
 interface MatchingProps {
   title: string
@@ -22,19 +21,19 @@ const Matching = ({ title, icon, type }: MatchingProps): ReactElement => {
 
   const handleClick = () => {
     askQuestion({
-      type: 'matching',
+      type: 'MATCHING',
+      position: location,
       data: {
-        position: location ?? defaultLocation,
-        matchingType: type,
+        type,
       },
     })
   }
 
   const isDisabled = hasQuestionBeenAsked({
-    type: 'matching',
+    type: 'MATCHING',
+    position: location,
     data: {
-      position: location ?? defaultLocation,
-      matchingType: type,
+      type,
     },
   })
 

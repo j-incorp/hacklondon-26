@@ -1,19 +1,8 @@
-import * as z from 'zod'
+import type { Position } from './game/types'
 
-const location = z.object({
-  latitude: z.number(),
-  longitude: z.number(),
-  accuracy: z.number(),
-})
-
-type Location = z.infer<typeof location>
-
-const defaultLocation: Location = {
-  latitude: 0,
-  longitude: 0,
-  accuracy: 0,
+const defaultLocation: Position = {
+  lat: 0,
+  long: 0,
 }
 
-export type { Location }
-
-export { defaultLocation, location }
+export { defaultLocation }

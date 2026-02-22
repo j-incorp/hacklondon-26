@@ -2,14 +2,22 @@ import { createStore } from '@tanstack/react-store'
 
 import type { Game } from './types'
 
-const initialState: Game = {
+interface GameStore extends Game {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  sendJsonMessage: ((message: any) => void) | null
+}
+
+const initialState: GameStore = {
   playerId: '',
   lobby: {
     code: '',
     name: '',
+    players: [],
   },
+  sendJsonMessage: null,
 }
 
 const gameStore = createStore(initialState)
 
+export type { GameStore }
 export { gameStore }

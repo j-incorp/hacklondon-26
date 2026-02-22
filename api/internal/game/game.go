@@ -80,7 +80,7 @@ func (l *Lobby) HandlePlayerMessage(player int, message []byte) {
 	}
 	switch msg.Type {
 	case MessageTypePlayerPosition:
-		slog.Debug("Received player position update", "playerId", l.players[player].Id, "position", msg.Data)
+		slog.Debug("Received player position update", "playerId", l.players[player].Id)
 		var pos Position
 		err := json.Unmarshal(msg.Data, &pos)
 		if err != nil {
