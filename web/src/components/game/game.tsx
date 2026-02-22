@@ -309,11 +309,17 @@ const Game = (): ReactElement => {
   }, [sendJsonMessage, store.lobby.code, playerLocation])
 
   const startGame = useCallback(async () => {
-    await fetch(`${import.meta.env.VITE_HTTP_PREFIX}://${import.meta.env.VITE_API_URL}/lobby/${store.lobby.code}/start`, { method: 'POST' })
+    await fetch(
+      `${import.meta.env.VITE_HTTP_PREFIX}://${import.meta.env.VITE_API_URL}/lobby/${store.lobby.code}/start`,
+      { method: 'POST' },
+    )
   }, [store.lobby.code])
 
   const endGame = useCallback(async () => {
-    const res = await fetch(`${import.meta.env.VITE_HTTP_PREFIX}://${import.meta.env.VITE_API_URL}/lobby/${store.lobby.code}/end`, { method: 'POST' })
+    const res = await fetch(
+      `${import.meta.env.VITE_HTTP_PREFIX}://${import.meta.env.VITE_API_URL}/lobby/${store.lobby.code}/end`,
+      { method: 'POST' },
+    )
     if (res.ok) {
       const { duration } = (await res.json()) as { duration: number }
 
@@ -418,11 +424,11 @@ const Game = (): ReactElement => {
               <p className="text-3xl font-bold mt-1">{gameDuration}</p>
             </div>
           )}
-          <div className="absolute bottom-4 right-4 z-40">
+          <div className="absolute bottom-8 right-8 z-40">
             <Tools type={store.role} />
           </div>
           {store.role === 'SEEKER' ? (
-            <div className="absolute bottom-4 left-4 z-40">
+            <div className="absolute bottom-8 left-8 z-40">
               <Gallery />
             </div>
           ) : undefined}
