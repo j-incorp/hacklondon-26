@@ -32,6 +32,9 @@ export default defineConfig({
       devOptions: {
         enabled: true,
       },
+      workbox: {
+        maximumFileSizeToCacheInBytes: 5000000,
+      },
       manifest: {
         name: 'hacklondon26',
         short_name: 'hacklondon26',
