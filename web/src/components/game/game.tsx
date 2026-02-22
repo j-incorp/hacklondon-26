@@ -36,10 +36,10 @@ const Game = (): ReactElement => {
 
   const joinUrl = disconnected
     ? null
-    : `ws://${import.meta.env.VITE_API_URL}/lobby/${store.lobby.code}?name=${store.lobby.name}`
+    : `${import.meta.env.VITE_WS_PREFIX}://${import.meta.env.VITE_API_URL}/lobby/${store.lobby.code}?name=${store.lobby.name}`
 
   const reconnectUrl = disconnected
-    ? `ws://${import.meta.env.VITE_API_URL}/lobby/${store.lobby.code}/reconnect?id=${store.playerId}`
+    ? `${import.meta.env.VITE_WS_PREFIX}//${import.meta.env.VITE_API_URL}/lobby/${store.lobby.code}/reconnect?id=${store.playerId}`
     : null
 
   const handleMessage = useCallback((event: MessageEvent<string>) => {
