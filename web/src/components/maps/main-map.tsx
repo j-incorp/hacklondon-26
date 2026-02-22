@@ -5,7 +5,7 @@ import { MapContainer, TileLayer } from 'react-leaflet'
 import { GeoJSON } from 'react-leaflet'
 
 import londonMask from '@/components/maps/consts/london-boundary.json'
-import { getLondonBorough } from '@/lib/geo/geo-utils'
+// import { getLondonBorough } from '@/lib/geo/geo-utils'
 
 // import { MapRadarMask } from './map-radar-mask'
 // import { BoroughMask } from './borough-mask'
@@ -20,24 +20,21 @@ interface MainMapProps {
   seekerLat?: number
   seekerLng?: number
   zoom: number
+  children?: React.ReactNode
 }
 
-const MainMap = ({ lat, lng, seekerLat, seekerLng, zoom }: MainMapProps): ReactElement => {
+const MainMap = ({ lat, lng, seekerLat, seekerLng, zoom, children }: MainMapProps): ReactElement => {
   const center: [number, number] = [lat, lng]
   // getTubeStopInfo(51.505, -0.09).then((info) => {
   //   console.log('Tube Stop Info:', info)
   // })
-
-  const borough = getLondonBorough(hattonCross[0], hattonCross[1])
-
-  console.log('Borough:', borough)
 
   return (
     <MapContainer
       center={center}
       zoom={zoom}
       scrollWheelZoom={false}
-      zoomControl={false}
+      zoomControl={true}
       style={{ height: '100%', width: '100%' }}
     >
       <TileLayer
@@ -54,7 +51,8 @@ const MainMap = ({ lat, lng, seekerLat, seekerLng, zoom }: MainMapProps): ReactE
 
       {/* <TubeLineMask lineName="Piccadilly" lineSuccess={true} color="blue" /> */}
       <PlayerMarker lat={lat} lng={lng} color="#000000" />
-      {seekerLat && seekerLng && <PlayerMarker lat={seekerLat} lng={seekerLng} color="#f54900" />}
+      {seekerLat && seekerLng && <PlayerMarker lat={seekerLat} lng={seekerLng} seekerMarker={true} color="#f54900" />}
+      {children}
     </MapContainer>
   )
 }

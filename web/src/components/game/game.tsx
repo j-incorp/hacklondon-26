@@ -12,15 +12,32 @@ import { Tools } from '../tools/tools'
 import { gameStore } from './game-store'
 import { HidingOverlay } from './hiding-overlay'
 import { PlayerList } from './player-list'
-import type { PlayerRole } from './types'
+import type { PlayerRole, QuestionResponse, RadarResponse } from './types'
 import { message } from './types'
+import { MapRadarMask } from '../maps/map-radar-mask'
+import { set } from 'zod'
 
 const Game = (): ReactElement => {
   const store = useStore(gameStore, (state) => state)
 
   const [disconnected, setDisconnected] = useState(false)
 
-  const { location } = useLocation()
+  const [mapKids, setMapKids] = useState<ReactElement[]>([])
+
+  const { playerLocation, loading, error } = useLocation()
+
+  if (loading) {
+    return <div>Loading location...</div>
+  }
+
+  if (error) {
+    return <div>Error loading location: {error.message}</div>
+  }
+
+  const playerLat = playerLocation?.lat ?? 51.5074
+  const playerLong = playerLocation?.long ?? -0.1278
+
+  const [seekerLocation, setSeekerLocation] = useState<{ lat: number; long: number } | null>(null)
 
   const joinUrl = disconnected
     ? null
@@ -97,8 +114,10 @@ const Game = (): ReactElement => {
       }
 
       case 'PLAYER_POSITION': {
+        // Seekers position
         const { lat, long } = msg.data
 
+        setSeekerLocation({ lat, long })
         // eslint-disable-next-line no-console
         console.log('Player position update', { lat, long })
 
@@ -107,6 +126,28 @@ const Game = (): ReactElement => {
 
       case 'PLAYER_ACTION': {
         const { action, data } = msg.data
+
+        switch (action) {
+          case 'ANSWER_QUESTION': {
+            const response = data as QuestionResponse
+            switch (response.type) {
+              case 'RADAR': {
+                const radarResponse = response.data as RadarResponse
+                const { radius } = radarResponse
+                // eslint-disable-next-line no-console
+
+                console.log('Radar question answered', { playerLat, playerLong, radius })
+
+                const radar = MapRadarMask({ center: [playerLat, playerLong], radius, radarSuccess: radarResponse.hit })
+
+                setMapKids((prev) => [...prev, radar])
+
+                break
+              }
+            }
+            break
+          }
+        }
 
         // eslint-disable-next-line no-console
         console.log('Player action received', { action, data })
@@ -212,7 +253,17 @@ const Game = (): ReactElement => {
         </>
       ) : (
         <div className="relative h-screen w-full">
-          <MainMap lat={51.505} lng={-0.09} zoom={11} />
+          <MainMap
+            lat={playerLat}
+            lng={playerLong}
+            seekerLat={seekerLocation?.lat}
+            seekerLng={seekerLocation?.long}
+            zoom={8}
+          >
+            {mapKids.map((kid, index) => (
+              <div key={index}>{kid}</div>
+            ))}
+          </MainMap>
           <p className="pointer-events-none absolute left-0 top-0 w-full bg-black/50 p-3 text-center text-lg font-semibold text-white mt-2">
             You are the <span className="uppercase">{store.role}</span>
           </p>
@@ -223,6 +274,60 @@ const Game = (): ReactElement => {
               </HandProvider>
             </QuestionsProvider>
           </div>
+          {store.role === 'SEEKER' && import.meta.env.DEV && (
+            <Button
+              className="absolute top-12 right-4 z-40"
+              onClick={() =>
+                handleMessage(
+                  new MessageEvent('message', {
+                    data: JSON.stringify({
+                      type: 'PLAYER_ACTION',
+                      data: {
+                        action: 'ANSWER_QUESTION',
+                        data: {
+                          type: 'RADAR',
+                          data: {
+                            radius: 500,
+                            hit: false,
+                          },
+                        },
+                      },
+                    }),
+                  }),
+                )
+              }
+              type="button"
+            >
+              Simulate Radar
+            </Button>
+          )}
+          {store.role === 'SEEKER' && import.meta.env.DEV && (
+            <Button
+              className="absolute top-12 right-4 z-40"
+              onClick={() =>
+                handleMessage(
+                  new MessageEvent('message', {
+                    data: JSON.stringify({
+                      type: 'PLAYER_ACTION',
+                      data: {
+                        action: 'ANSWER_QUESTION',
+                        data: {
+                          type: 'RADAR',
+                          data: {
+                            radius: 500,
+                            hit: false,
+                          },
+                        },
+                      },
+                    }),
+                  }),
+                )
+              }
+              type="button"
+            >
+              Simulate Radar
+            </Button>
+          )}
         </div>
       )}
     </div>
