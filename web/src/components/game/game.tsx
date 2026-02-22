@@ -184,8 +184,8 @@ const Game = (): ReactElement => {
       sendJsonMessage({
         type: 'PLAYER_POSITION',
         data: {
-          lat: location.latitude,
-          long: location.longitude,
+          lat: location.lat,
+          long: location.long,
         },
       })
     }, 10_000)
