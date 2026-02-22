@@ -296,7 +296,7 @@ const Game = (): ReactElement => {
     }, 10_000)
 
     return () => window.clearInterval(intervalId)
-  }, [sendJsonMessage, store.lobby.code, location])
+  }, [sendJsonMessage, store.lobby.code, playerLocation])
 
   const startGame = useCallback(async () => {
     await fetch(`http://${import.meta.env.VITE_API_URL}/lobby/${store.lobby.code}/start`, { method: 'POST' })
