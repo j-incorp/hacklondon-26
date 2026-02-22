@@ -96,7 +96,7 @@ const Gallery = (): ReactElement => {
         >
           {isNonEmptyArray(images) ? (
             <img
-              src={images[activeIndex]?.pictureUrl}
+              src={'https://' + images[activeIndex]?.pictureUrl}
               alt={`Photo ${activeIndex + 1} of ${images.length}`}
               className="max-h-full max-w-full rounded-lg object-contain"
             />
