@@ -1,5 +1,6 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
 
+import { PictureAlert } from '@/components/alert/picture-alert'
 import { CameraCapture } from '@/components/camera/camera-capture'
 import { LobbyForms } from '@/components/lobby/lobby-forms'
 import { Location } from '@/components/location/location'
@@ -14,10 +15,10 @@ const Page = () => {
 
   return (
     <div className="p-2">
-      <h3>Welcome Home!</h3>
       <CameraCapture onCapture={handleCapture} />
       <Location />
       <LobbyForms />
+      <PictureAlert onCapture={handleCapture} question={{ type: 'sky' }} />
     </div>
   )
 }
