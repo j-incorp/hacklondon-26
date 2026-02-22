@@ -22,7 +22,7 @@ const Radar = ({ size }: RadarProps): ReactElement => {
       type: 'RADAR',
       position: location ?? defaultPosition,
       data: {
-        radius: size,
+        radius: size * 1000,
       },
     })
   }
@@ -33,7 +33,7 @@ const Radar = ({ size }: RadarProps): ReactElement => {
       type: 'RADAR',
       position: location ?? defaultPosition,
       data: {
-        radius: size,
+        radius: size * 1000,
       },
     })
 

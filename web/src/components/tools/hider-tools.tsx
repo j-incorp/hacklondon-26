@@ -94,8 +94,7 @@ const HiderTools = (): ReactElement => {
             Deck
           </DrawerTitle>
           <DrawerDescription>
-            Use these cards to claim more time or slow the seekers down! Click on a card to get more information and use
-            it.
+            Use these cards to claim more time or slow the seekers down! Check the guide for more information.
           </DrawerDescription>
         </DrawerHeader>
         <div

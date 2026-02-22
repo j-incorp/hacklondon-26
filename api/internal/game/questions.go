@@ -28,8 +28,9 @@ type IncomingQuestionRequest struct {
 
 // An outgoing question request to send to the hider client
 type OutgoingQuestionRequest struct {
-	Type QuestionType `json:"type"`
-	Data any          `json:"data,omitempty"`
+	Type           QuestionType `json:"type"`
+	PlayerPosition Position     `json:"position"`
+	Data           any          `json:"data,omitempty"`
 }
 
 // A question response from the hider client
@@ -55,6 +56,7 @@ type RadarResponse struct {
 
 // Handle incoming question requests from the seeker client
 func (q IncomingQuestionRequest) Ask(lobby *Lobby, asker *Player, answerer *Player) error {
+	slog.Debug("Received question request", "askerId", asker.Id, "questionType", q.Type)
 	switch q.Type {
 	case QuestionTypeRadar:
 		var radarQ RadarQuestion
@@ -85,8 +87,9 @@ func (q IncomingQuestionRequest) Ask(lobby *Lobby, asker *Player, answerer *Play
 		}
 		// Prompt the hider client to upload a picture
 		req := OutgoingQuestionRequest{
-			Type: QuestionTypePicture,
-			Data: picQ,
+			Type:           QuestionTypePicture,
+			PlayerPosition: asker.Position,
+			Data:           picQ,
 		}
 		reqBytes, _ := json.Marshal(OutgoingMessage{Type: MessageTypePlayerAction, Data: OutgoingPlayerActionMessage{Action: PlayerActionAskQuestion, Data: req}})
 		err = lobby.sendToPlayer(answerer.Id, reqBytes)
@@ -103,17 +106,6 @@ func (q IncomingQuestionRequest) Ask(lobby *Lobby, asker *Player, answerer *Play
 		}
 		// Handle matching response automatically
 		var hit bool
-		switch matchingQ.MatchingType {
-		case MatchingTypeNearestTubeLine:
-			hit = false
-		case MatchingTypeNearestHospital:
-			hit = false
-		case MatchingTypeNearestAirport:
-			hit = false
-		default:
-			slog.Warn("Received unknown matching question type", "matchingType", matchingQ.MatchingType, "askerId", asker.Id)
-			return errors.New("unknown matching question type")
-		}
 		resp, _ := json.Marshal(OutgoingMessage{Type: MessageTypePlayerAction, Data: OutgoingPlayerActionMessage{Action: PlayerActionAnswerQuestion, Data: OutgoingQuestionResponse{Type: QuestionTypeMatching, Data: MatchingResponse{MatchingType: matchingQ.MatchingType, Hit: hit}}}})
 		err = lobby.sendToPlayer(answerer.Id, resp)
 	default:
@@ -169,9 +161,18 @@ func latLongDistance(pos1 Position, pos2 Position) float64 {
 type PictureType string
 
 const (
-	PictureTypeTallestBuilding PictureType = "tallest building"
-	PictureTypeNearestWater    PictureType = "nearest large body of water"
-	PictureTypePavement        PictureType = "pavement"
+	PictureTypeFiveBuildings   = "five-buildings"
+	PictureTypeTallestBuilding = "tallest-building"
+	PictureTypeTrainStation    = "train-station"
+	PictureTypeBodyOfWater     = "body-of-water"
+	PictureTypeSkyline         = "sky"
+	PictureTypeStreetArt       = "street-art"
+	PictureTypeBusRouteNumber  = "bus-route-number"
+	PictureTypeStreetSign      = "street-sign"
+	PictureTypeMonumentShadow  = "monument-shadow"
+	PictureTypeStravaMap       = "strava-map"
+	PictureTypeChurches        = "church"
+	PictureTypeClockFace       = "clock"
 )
 
 type PictureQuestion struct {
@@ -185,9 +186,8 @@ type PictureResponse struct {
 type MatchingType string
 
 const (
-	MatchingTypeNearestTubeLine MatchingType = "nearest tube line"
-	MatchingTypeNearestHospital MatchingType = "nearest hospital"
-	MatchingTypeNearestAirport  MatchingType = "nearest airport"
+	MatchingTypeTubeLine      = "tube-line"
+	MatchingTypeLondonBorough = "london-borough"
 )
 
 type MatchingQuestion struct {
