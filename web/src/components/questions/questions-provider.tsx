@@ -12,6 +12,8 @@ interface QuestionsContextValue {
   askQuestion: (data: QuestionRequest) => void
   addQuestionResponse: (response: QuestionResponse) => void
   hasQuestionBeenAsked: (question: QuestionRequest) => boolean
+  addResponse: (response: QuestionResponse) => void
+  getResponses: () => QuestionResponse[]
 }
 
 const initialState: QuestionsContextValue = {
@@ -20,6 +22,8 @@ const initialState: QuestionsContextValue = {
   askQuestion: () => void 0,
   addQuestionResponse: () => void 0,
   hasQuestionBeenAsked: () => false,
+  addResponse: () => void 0,
+  getResponses: () => [],
 }
 
 const QuestionsProviderContext = createContext<QuestionsContextValue>(initialState)
@@ -97,12 +101,25 @@ const QuestionsProvider = ({ children, ...props }: QuestionsProviderProps) => {
     })
   }
 
+  const getResponses = () => {
+    return store.responses
+  }
+
+  const addResponse = (response: QuestionResponse) => {
+    questionStore.setState((prev) => ({
+      ...prev,
+      responses: [...prev.responses, response],
+    }))
+  }
+
   const value = {
     getData: getData,
     setData: setData,
     askQuestion: askQuestion,
     addQuestionResponse: addQuestionResponse,
     hasQuestionBeenAsked: hasQuestionBeenAsked,
+    addResponse: addResponse,
+    getResponses: getResponses,
   }
 
   return (

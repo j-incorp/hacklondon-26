@@ -62,8 +62,6 @@ const lobby = z.object({
   players: z.array(player),
 })
 
-
-
 // ── Outgoing message data payloads ─────────────────────────────────────
 
 const playerInfoMessage = z.object({
