@@ -12,6 +12,8 @@ const initialState: GameStore = {
   role: '',
   gameState: 'WAITING_FOR_PLAYERS',
   hidingPhaseEndTime: new Date(),
+  currentQuestion: undefined,
+  currentPictureQuestion: undefined,
   lobby: {
     code: '',
     name: '',

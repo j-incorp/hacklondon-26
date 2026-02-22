@@ -21,7 +21,7 @@ const getQuestionTitle = (question: QuestionResponse) => {
     const radius = question.data && 'radius' in question.data ? question.data.radius : undefined
     const hit = question.data && 'hit' in question.data ? question.data.hit : undefined
 
-    return radius !== undefined ? `You have been ${hit ? 'hit' : 'missed'} by a ${radius}km radar` : 'Radar'
+    return radius !== undefined ? `You have been ${hit ? 'hit' : 'missed'} by a ${radius/1000}km radar` : 'Radar'
   }
 
   if (question.type === 'MATCHING') {

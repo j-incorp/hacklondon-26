@@ -5,6 +5,8 @@ import { useWebSocket } from 'react-use-websocket/dist/lib/use-websocket'
 import { useLocation } from '@/hooks/use-location'
 import { Button } from '@/ui/button'
 
+import { PictureAlert } from '../alert/picture-alert'
+import { QuestionAlert } from '../alert/question-alert'
 import { HandProvider } from '../cards/hand-provider'
 import { MainMap } from '../maps/main-map'
 import { QuestionsProvider } from '../questions/questions-provider'
@@ -12,7 +14,7 @@ import { Tools } from '../tools/tools'
 import { gameStore } from './game-store'
 import { HidingOverlay } from './hiding-overlay'
 import { PlayerList } from './player-list'
-import type { PlayerRole } from './types'
+import type { PictureQuestion,PlayerRole, QuestionRequest, QuestionResponse } from './types'
 import { message } from './types'
 
 const formatDuration = (totalSeconds: number): string => {
@@ -119,6 +121,54 @@ const Game = (): ReactElement => {
 
         // eslint-disable-next-line no-console
         console.log('Player action received', { action, data })
+
+        switch (action) {
+          case 'ASK_QUESTION':
+            const { type, data: qData } = data as QuestionRequest;
+            switch (type) {
+              case 'RADAR':
+                break;
+              case 'PICTURE':
+                const pData = qData as PictureQuestion
+
+                gameStore.setState((prev) => ({
+                  ...prev,
+                  currentPictureQuestion: {
+                    ...pData,
+                  },
+                }))
+
+                break;
+              case 'MATCHING':
+                // eslint-disable-next-line no-console
+                console.log('Received question request', { type })
+
+                break
+              default:
+                // eslint-disable-next-line no-console
+                console.warn('Received unknown question type', { type })
+            }
+            break;
+          case 'ANSWER_QUESTION':
+            const { type: answerType, data: answerData } = data as QuestionResponse;
+
+            gameStore.setState((prev) => ({
+              ...prev,
+              currentQuestion: {
+                type: answerType,
+                data: answerData,
+              },
+            }))
+
+            break
+          case 'VETO_QUESTION':
+            break
+          case 'SEND_CURSE':
+            break
+          default:
+            // eslint-disable-next-line no-console
+            console.warn('Received unknown player action', { action, data })
+        }
 
         break
       }
@@ -231,6 +281,44 @@ const Game = (): ReactElement => {
       ) : (
         <div className="relative h-screen w-full">
           <MainMap lat={51.505} lng={-0.09} zoom={11} />
+          <PictureAlert question={store.currentPictureQuestion} onCapture={async (file: File) => {
+            const { type, size } = file;
+            const url = await fetch(`http://${import.meta.env.VITE_API_URL}/upload`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                filetype: type,
+                size,
+              })
+            })
+
+            const resp = await url.json();
+            const { url: uploadUrl, key } = resp as { url: string, key: string };
+
+            await fetch(uploadUrl, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': type,
+              },
+              body: file,
+            })
+
+            sendJsonMessage({
+              type: 'PLAYER_ACTION',
+              data: {
+                action: 'ANSWER_QUESTION',
+                data: {
+                  type: 'PICTURE',
+                  data: {
+                    pictureUrl: 'd1bxoywow59vkr.cloudfront.net/' + key,
+                  },
+                },
+              },
+            })
+          }}/>
+          <QuestionAlert question={store.currentQuestion}></QuestionAlert>
           <p className="pointer-events-none absolute left-0 top-0 w-full bg-black/50 p-3 text-center text-lg font-semibold text-white mt-2">
             You are the <span className="uppercase">{store.role}</span>
           </p>
