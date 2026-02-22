@@ -21,16 +21,16 @@ const CameraCapture = ({ onCapture, className }: CameraCaptureProps): ReactEleme
     async (e: ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0]
       if (file) {
-          try {
-            setLoading(true)
-            await onCapture(file)
-          } finally {
-            setLoading(false)
-    
-            // Reset so the same file can be re-selected if needed
-            if (inputRef.current) {
-              inputRef.current.value = ''
-            }
+        try {
+          setLoading(true)
+          await onCapture(file)
+        } finally {
+          setLoading(false)
+
+          // Reset so the same file can be re-selected if needed
+          if (inputRef.current) {
+            inputRef.current.value = ''
+          }
         }
       }
     },

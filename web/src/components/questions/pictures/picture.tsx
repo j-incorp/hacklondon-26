@@ -1,11 +1,11 @@
 import { type ReactElement } from 'react'
 
-import { defaultLocation } from '@/components/types'
+import { useLocation } from '@/hooks/use-location'
 import { useQuestions } from '@/hooks/use-questions'
 import { isDefined } from '@/lib/is/is-defined'
 import { Button } from '@/ui/button'
 
-import type { PictureType } from './types'
+import type { PictureType } from '../../game/types'
 
 interface PictureProps {
   title: string
@@ -16,26 +16,23 @@ interface PictureProps {
 
 const Picture = ({ title, icon, type }: PictureProps): ReactElement => {
   const { askQuestion, hasQuestionBeenAsked } = useQuestions()
+  const { location } = useLocation()
 
   const handleClick = () => {
     askQuestion({
-      type: 'picture',
+      type: 'PICTURE',
+      position: location,
       data: {
-        position: {
-          latitude: 0,
-          longitude: 0,
-          accuracy: 0,
-        },
-        pictureType: type,
+        type,
       },
     })
   }
 
   const isDisabled = hasQuestionBeenAsked({
-    type: 'picture',
+    type: 'PICTURE',
+    position: location,
     data: {
-      position: defaultLocation,
-      pictureType: type,
+      type,
     },
   })
 
