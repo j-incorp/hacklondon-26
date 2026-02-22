@@ -19,6 +19,8 @@ services:
       context: ./api
       dockerfile: build/http.Dockerfile
     container_name: api
+    volumes:
+      - ./api/.env:/app/.env:ro
     networks:
       - internal_routing
 
