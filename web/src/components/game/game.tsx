@@ -8,6 +8,7 @@ import { Button } from '@/ui/button'
 import { PictureAlert } from '../alert/picture-alert'
 import { QuestionAlert } from '../alert/question-alert'
 import { HandProvider } from '../cards/hand-provider'
+import { handStore } from '../cards/hand-store'
 import { MainMap } from '../maps/main-map'
 import { QuestionsProvider } from '../questions/questions-provider'
 import { Tools } from '../tools/tools'
@@ -24,6 +25,8 @@ const formatDuration = (totalSeconds: number): string => {
 }
 
 const Game = (): ReactElement => {
+  const hStore = useStore(handStore, (state) => state)
+
   const store = useStore(gameStore, (state) => state)
 
   const [disconnected, setDisconnected] = useState(false)
@@ -46,7 +49,7 @@ const Game = (): ReactElement => {
       // eslint-disable-next-line no-console
       console.error('Failed to parse incoming message', parsed.error)
 
-      console.log(event.data);
+      console.log(event.data)
 
       return
     }
@@ -261,9 +264,17 @@ const Game = (): ReactElement => {
     if (res.ok) {
       const { duration } = (await res.json()) as { duration: number }
 
-      setGameDuration(formatDuration(duration))
+      let addTime = 0
+
+      hStore.cards
+        .filter((card) => card.type === 'time-bonus')
+        .forEach((card) => {
+          addTime += card.amount * 60
+        })
+
+      setGameDuration(formatDuration(duration + addTime))
     }
-  }, [store.lobby.code])
+  }, [store.lobby.code, hStore])
 
   return (
     <div className="flex flex-col w-full h-full text-center justify-center items-center content-center">
@@ -322,13 +333,19 @@ const Game = (): ReactElement => {
           <p className="pointer-events-none absolute left-0 top-0 w-full bg-black/50 p-3 text-center text-lg font-semibold text-white mt-2">
             You are the <span className="uppercase">{store.role}</span>
           </p>
-          {store.role === 'HIDER' && (store.gameState === 'HIDING' || store.gameState === 'SEEKING') && !gameDuration && (
-            <div className="absolute top-14 left-1/2 -translate-x-1/2 z-50">
-              <Button className="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3 text-lg" onClick={endGame} type="button">
-                I have been found
-              </Button>
-            </div>
-          )}
+          {store.role === 'HIDER' &&
+            (store.gameState === 'HIDING' || store.gameState === 'SEEKING') &&
+            !gameDuration && (
+              <div className="absolute top-14 left-1/2 -translate-x-1/2 z-50">
+                <Button
+                  className="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3 text-lg"
+                  onClick={endGame}
+                  type="button"
+                >
+                  I have been found
+                </Button>
+              </div>
+            )}
           {gameDuration && (
             <div className="absolute top-14 left-1/2 -translate-x-1/2 z-50 bg-black/70 text-white rounded-lg px-6 py-4 text-center">
               <p className="text-lg font-semibold">You were found! It took...</p>

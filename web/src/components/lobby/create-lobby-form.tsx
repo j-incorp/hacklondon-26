@@ -28,7 +28,7 @@ const CreateLobbyForm = (): ReactElement => {
           },
         }}
         children={(field) => (
-          <div className="mb-4">
+          <div className="mb-4 text-left">
             <label htmlFor={field.name} className="block mb-1.5">
               Name
             </label>
