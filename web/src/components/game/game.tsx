@@ -338,7 +338,7 @@ const Game = (): ReactElement => {
             question={store.currentPictureQuestion}
             onCapture={async (file: File) => {
               const { type, size } = file
-              const url = await fetch(`http://${import.meta.env.VITE_API_URL}/upload`, {
+              const url = await fetch(`${import.meta.env.VITE_HTTP_PREFIX}://${import.meta.env.VITE_API_URL}/upload`, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
