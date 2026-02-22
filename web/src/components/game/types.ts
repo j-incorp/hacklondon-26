@@ -51,6 +51,9 @@ const lobby = z.object({
 
 const game = z.object({
   playerId: z.string(),
+  role: playerRole,
+  gameState: gameState,
+  hidingPhaseEndTime: z.date(),
   lobby: lobby,
 })
 
