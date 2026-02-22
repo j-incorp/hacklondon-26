@@ -62,13 +62,7 @@ const lobby = z.object({
   players: z.array(player),
 })
 
-const game = z.object({
-  playerId: z.string(),
-  role: playerRole,
-  gameState: gameState,
-  hidingPhaseEndTime: z.date(),
-  lobby: lobby,
-})
+
 
 // ── Outgoing message data payloads ─────────────────────────────────────
 
@@ -131,12 +125,6 @@ const matchingResponse = z.object({
   hit: z.boolean(),
 })
 
-const questionRequest = z.object({
-  type: questionType,
-  position: position,
-  data: z.union([radarQuestion, pictureQuestion, matchingQuestion]).optional(),
-})
-
 const questionResponse = z.object({
   type: questionType,
   data: z.union([radarResponse, pictureResponse, matchingResponse]).optional(),
@@ -150,9 +138,25 @@ const curseNotification = z.object({
 
 // ── Outgoing player action wrapper ─────────────────────────────────────
 
+const questionRequest = z.object({
+  type: questionType,
+  position: position,
+  data: z.union([radarQuestion, pictureQuestion, matchingQuestion]).optional(),
+})
+
 const playerActionMessage = z.object({
   action: playerAction,
   data: z.union([questionRequest, questionResponse, curseNotification]).optional(),
+})
+
+const game = z.object({
+  playerId: z.string(),
+  role: playerRole,
+  gameState: gameState,
+  currentQuestion: questionResponse.optional(),
+  currentPictureQuestion: pictureQuestion.optional(),
+  hidingPhaseEndTime: z.date(),
+  lobby: lobby,
 })
 
 // ── Top-level outgoing message (discriminated by `type`) ───────────────

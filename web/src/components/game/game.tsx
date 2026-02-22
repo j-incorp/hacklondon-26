@@ -5,16 +5,25 @@ import { useWebSocket } from 'react-use-websocket/dist/lib/use-websocket'
 import { useLocation } from '@/hooks/use-location'
 import { Button } from '@/ui/button'
 
+import { PictureAlert } from '../alert/picture-alert'
+import { QuestionAlert } from '../alert/question-alert'
 import { HandProvider } from '../cards/hand-provider'
 import { handStore } from '../cards/hand-store'
 import { MainMap } from '../maps/main-map'
+import { MapRadarMask } from '../maps/map-radar-mask'
 import { QuestionsProvider } from '../questions/questions-provider'
 import { Gallery } from '../tools/gallery'
 import { Tools } from '../tools/tools'
 import { gameStore } from './game-store'
 import { HidingOverlay } from './hiding-overlay'
 import { PlayerList } from './player-list'
-import type { PlayerRole } from './types'
+import type {
+  // PictureQuestion,
+  PlayerRole,
+  // QuestionRequest,
+  QuestionResponse,
+  RadarResponse,
+} from './types'
 import { message } from './types'
 
 const formatDuration = (totalSeconds: number): string => {
@@ -30,8 +39,13 @@ const Game = (): ReactElement => {
 
   const [disconnected, setDisconnected] = useState(false)
   const [gameDuration, setGameDuration] = useState<string | null>(null)
+  const [mapKids, setMapKids] = useState<ReactElement[]>([])
 
-  const { location } = useLocation()
+  const { location: playerLocation } = useLocation()
+
+  const playerLat = playerLocation?.lat ?? 51.5074
+  const playerLong = playerLocation?.long ?? -0.1278
+  const [seekerLocation, setSeekerLocation] = useState<{ lat: number; long: number }>()
 
   const joinUrl = disconnected
     ? null
@@ -41,117 +55,145 @@ const Game = (): ReactElement => {
     ? `ws://${import.meta.env.VITE_API_URL}/lobby/${store.lobby.code}/reconnect?id=${store.playerId}`
     : null
 
-  const handleMessage = useCallback((event: MessageEvent<string>) => {
-    const parsed = message.safeParse(JSON.parse(event.data))
+  const handleMessage = useCallback(
+    (event: MessageEvent<string>) => {
+      const parsed = message.safeParse(JSON.parse(event.data))
 
-    if (!parsed.success) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to parse incoming message', parsed.error)
-
-      console.log(event.data)
-
-      return
-    }
-
-    const msg = parsed.data
-
-    switch (msg.type) {
-      case 'PLAYER_INFO': {
-        const { id, name, role } = msg.data
-
+      if (!parsed.success) {
         // eslint-disable-next-line no-console
-        console.log('Player info received', { id, name, role })
-        gameStore.setState((prev) => ({ ...prev, playerId: id, role: role as PlayerRole }))
+        console.error('Failed to parse incoming message', parsed.error)
 
-        break
+        console.log(event.data)
+
+        return
       }
 
-      case 'PLAYER_JOINED': {
-        const { playerId } = msg.data
+      const msg = parsed.data
 
-        // eslint-disable-next-line no-console
-        console.log('Player joined', { playerId })
+      switch (msg.type) {
+        case 'PLAYER_INFO': {
+          const { id, name, role } = msg.data
 
-        break
-      }
-
-      case 'PLAYER_LEFT': {
-        const { playerId } = msg.data
-
-        // eslint-disable-next-line no-console
-        console.log('Player left', { playerId })
-
-        break
-      }
-
-      case 'GAME_STATE_CHANGE': {
-        const { state } = msg.data
-
-        // eslint-disable-next-line no-console
-        console.log('Game state changed', { state })
-
-        gameStore.setState((prev) => ({ ...prev, gameState: state }))
-
-        break
-      }
-
-      case 'HIDING_PHASE_START': {
-        const { duration } = msg.data
-
-        // eslint-disable-next-line no-console
-        console.log('Hiding phase started', { duration })
-
-        gameStore.setState((prev) => ({
-          ...prev,
-          hidingPhaseEndTime: new Date(Date.now() + duration * 1000),
-        }))
-
-        break
-      }
-
-      case 'PLAYER_POSITION': {
-        const { lat, long } = msg.data
-
-        // eslint-disable-next-line no-console
-        console.log('Player position update', { lat, long })
-
-        break
-      }
-
-      case 'PLAYER_ACTION': {
-        const { action, data } = msg.data
-
-        // eslint-disable-next-line no-console
-        console.log('Player action received', { action, data })
-
-        break
-      }
-
-      case 'PLAYER_LIST_UPDATE': {
-        const { players } = msg.data
-
-        // eslint-disable-next-line no-console
-        console.log('Player list updated', { players })
-
-        if (players.find((p) => p.id === gameStore.state.playerId)) {
           // eslint-disable-next-line no-console
-          console.log('Current player is in the updated player list')
-          // Update the player's role
-          gameStore.setState((prev) => ({
-            ...prev,
-            role: players.find((p) => p.id === prev.playerId)?.role || '',
-          }))
+          console.log('Player info received', { id, name, role })
+          gameStore.setState((prev) => ({ ...prev, playerId: id, role: role as PlayerRole }))
+
+          break
         }
 
-        gameStore.setState((prev) => ({
-          ...prev,
-          lobby: { ...prev.lobby, players },
-        }))
+        case 'PLAYER_JOINED': {
+          const { playerId } = msg.data
 
-        break
+          // eslint-disable-next-line no-console
+          console.log('Player joined', { playerId })
+
+          break
+        }
+
+        case 'PLAYER_LEFT': {
+          const { playerId } = msg.data
+
+          // eslint-disable-next-line no-console
+          console.log('Player left', { playerId })
+
+          break
+        }
+
+        case 'GAME_STATE_CHANGE': {
+          const { state } = msg.data
+
+          // eslint-disable-next-line no-console
+          console.log('Game state changed', { state })
+
+          gameStore.setState((prev) => ({ ...prev, gameState: state }))
+
+          break
+        }
+
+        case 'HIDING_PHASE_START': {
+          const { duration } = msg.data
+
+          // eslint-disable-next-line no-console
+          console.log('Hiding phase started', { duration })
+
+          gameStore.setState((prev) => ({
+            ...prev,
+            hidingPhaseEndTime: new Date(Date.now() + duration * 1000),
+          }))
+
+          break
+        }
+
+        case 'PLAYER_POSITION': {
+          // Seekers position
+          const { lat, long } = msg.data
+
+          setSeekerLocation({ lat, long })
+          // eslint-disable-next-line no-console
+          console.log('Player position update', { lat, long })
+
+          break
+        }
+
+        case 'PLAYER_ACTION': {
+          const { action, data } = msg.data
+
+          switch (action) {
+            case 'ANSWER_QUESTION': {
+              const response = data as QuestionResponse
+              switch (response.type) {
+                case 'RADAR': {
+                  const radarResponse = response.data as RadarResponse
+                  const { radius } = radarResponse
+
+                  const radar = MapRadarMask({
+                    center: [playerLat, playerLong],
+                    radius,
+                    radarSuccess: radarResponse.hit,
+                  })
+
+                  setMapKids((prev) => [...prev, radar])
+
+                  break
+                }
+              }
+              break
+            }
+          }
+
+          // eslint-disable-next-line no-console
+          console.log('Player action received', { action, data })
+
+          break
+        }
+
+        case 'PLAYER_LIST_UPDATE': {
+          const { players } = msg.data
+
+          // eslint-disable-next-line no-console
+          console.log('Player list updated', { players })
+
+          if (players.find((p) => p.id === gameStore.state.playerId)) {
+            // eslint-disable-next-line no-console
+            console.log('Current player is in the updated player list')
+            // Update the player's role
+            gameStore.setState((prev) => ({
+              ...prev,
+              role: players.find((p) => p.id === prev.playerId)?.role || '',
+            }))
+          }
+
+          gameStore.setState((prev) => ({
+            ...prev,
+            lobby: { ...prev.lobby, players },
+          }))
+
+          break
+        }
       }
-    }
-  }, [])
+    },
+    [playerLat, playerLong],
+  )
 
   const handleClose = useCallback(() => {
     if (gameStore.state.gameState !== 'WAITING_FOR_PLAYERS') {
@@ -197,8 +239,8 @@ const Game = (): ReactElement => {
       sendJsonMessage({
         type: 'PLAYER_POSITION',
         data: {
-          lat: location.lat,
-          long: location.long,
+          lat: playerLocation?.lat,
+          long: playerLocation?.long,
         },
       })
     }, 10_000)
@@ -242,7 +284,58 @@ const Game = (): ReactElement => {
         </>
       ) : (
         <div className="relative h-screen w-full">
-          <MainMap lat={51.505} lng={-0.09} zoom={11} />
+          <PictureAlert
+            question={store.currentPictureQuestion}
+            onCapture={async (file: File) => {
+              const { type, size } = file
+              const url = await fetch(`http://${import.meta.env.VITE_API_URL}/upload`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  filetype: type,
+                  size,
+                }),
+              })
+
+              const resp = await url.json()
+              const { url: uploadUrl, key } = resp as { url: string; key: string }
+
+              await fetch(uploadUrl, {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': type,
+                },
+                body: file,
+              })
+
+              sendJsonMessage({
+                type: 'PLAYER_ACTION',
+                data: {
+                  action: 'ANSWER_QUESTION',
+                  data: {
+                    type: 'PICTURE',
+                    data: {
+                      pictureUrl: 'd1bxoywow59vkr.cloudfront.net/' + key,
+                    },
+                  },
+                },
+              })
+            }}
+          />
+          <QuestionAlert question={store.currentQuestion}></QuestionAlert>
+          <MainMap
+            lat={playerLat}
+            lng={playerLong}
+            seekerLat={seekerLocation?.lat}
+            seekerLng={seekerLocation?.long}
+            zoom={8}
+          >
+            {mapKids.map((kid, index) => (
+              <div key={index}>{kid}</div>
+            ))}
+          </MainMap>
           <p className="pointer-events-none absolute left-0 top-0 w-full bg-black/50 p-3 text-center text-lg font-semibold text-white mt-2">
             You are the <span className="uppercase">{store.role}</span>
           </p>
