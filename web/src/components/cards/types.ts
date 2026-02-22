@@ -17,9 +17,14 @@ const timeBonus = z.object({
 
 type TimeBonus = z.infer<typeof timeBonus>
 
+const curseType = z.enum(['orange', 'newspaper', 'fries', 'taxi', 'rhyme', 'signal-fault'])
+
+type CurseType = z.infer<typeof curseType>
+
 const curse = z.object({
   type: z.literal('curse'),
   title: z.string(),
+  curseType: curseType,
 })
 
 type Curse = z.infer<typeof curse>
@@ -46,6 +51,6 @@ const handData = z.object({
 
 type HandData = z.infer<typeof handData>
 
-export type { Card, CardType, Curse, Deck, Duplicate, HandData, TimeBonus, Veto }
+export type { Card, CardType, Curse, CurseType, Deck, Duplicate, HandData, TimeBonus, Veto }
 
-export { card, cardType, curse, deck, duplicate, handData, timeBonus, veto }
+export { card, cardType, curse, curseType, deck, duplicate, handData, timeBonus, veto }

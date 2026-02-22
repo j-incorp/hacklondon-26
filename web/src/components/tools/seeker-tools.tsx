@@ -97,7 +97,7 @@ const SeekerTools = (): ReactElement => {
             Toolbox
           </DrawerTitle>
           <DrawerDescription>
-            Use these tools to find the hider! Click on a tool to get more information and use it.
+            Use these tools to find the hider! Check the guide for more information.
           </DrawerDescription>
         </DrawerHeader>
         <div
