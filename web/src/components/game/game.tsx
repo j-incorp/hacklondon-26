@@ -15,10 +15,17 @@ import { PlayerList } from './player-list'
 import type { PlayerRole } from './types'
 import { message } from './types'
 
+const formatDuration = (totalSeconds: number): string => {
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = Math.floor(totalSeconds % 60)
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+}
+
 const Game = (): ReactElement => {
   const store = useStore(gameStore, (state) => state)
 
   const [disconnected, setDisconnected] = useState(false)
+  const [gameDuration, setGameDuration] = useState<string | null>(null)
 
   const { location } = useLocation()
 
@@ -199,6 +206,15 @@ const Game = (): ReactElement => {
     await fetch(`http://${import.meta.env.VITE_API_URL}/lobby/${store.lobby.code}/start`, { method: 'POST' })
   }, [store.lobby.code])
 
+  const endGame = useCallback(async () => {
+    const res = await fetch(`http://${import.meta.env.VITE_API_URL}/lobby/${store.lobby.code}/end`, { method: 'POST' })
+    if (res.ok) {
+      const { duration } = (await res.json()) as { duration: number }
+
+      setGameDuration(formatDuration(duration))
+    }
+  }, [store.lobby.code])
+
   return (
     <div className="flex flex-col w-full h-full text-center justify-center items-center content-center">
       {store.gameState === 'HIDING' && <HidingOverlay endTime={store.hidingPhaseEndTime} />}
@@ -218,6 +234,19 @@ const Game = (): ReactElement => {
           <p className="pointer-events-none absolute left-0 top-0 w-full bg-black/50 p-3 text-center text-lg font-semibold text-white mt-2">
             You are the <span className="uppercase">{store.role}</span>
           </p>
+          {store.role === 'HIDER' && (store.gameState === 'HIDING' || store.gameState === 'SEEKING') && !gameDuration && (
+            <div className="absolute top-14 left-1/2 -translate-x-1/2 z-50">
+              <Button className="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3 text-lg" onClick={endGame} type="button">
+                I have been found
+              </Button>
+            </div>
+          )}
+          {gameDuration && (
+            <div className="absolute top-14 left-1/2 -translate-x-1/2 z-50 bg-black/70 text-white rounded-lg px-6 py-4 text-center">
+              <p className="text-lg font-semibold">You were found! It took...</p>
+              <p className="text-3xl font-bold mt-1">{gameDuration}</p>
+            </div>
+          )}
           <div className="absolute bottom-4 right-4 z-40">
             <QuestionsProvider>
               <HandProvider>

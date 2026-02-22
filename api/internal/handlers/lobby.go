@@ -79,6 +79,26 @@ func (s *Server) StartGame(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+func (s *Server) EndGame(c *gin.Context) {
+	code := strings.ToUpper(c.Param("code"))
+
+	if len(code) != 4 {
+		slog.Debug("Invalid lobby code", "code", code)
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
+	lobby, exists := store.GetLobby(code)
+	if !exists {
+		slog.Debug("Lobby not found", "code", code)
+		c.Status(http.StatusNotFound)
+		return
+	}
+
+	timeSince := lobby.EndGame()
+	c.JSON(http.StatusOK, gin.H{"duration": timeSince.Seconds()})
+}
+
 // Reconnect upgrades to a WebSocket and re-establishes a disconnected player's session.
 func (s *Server) Reconnect(c *gin.Context) {
 	code := strings.ToUpper(c.Param("code"))
