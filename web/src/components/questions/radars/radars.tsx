@@ -1,3 +1,4 @@
+import { isNonEmptyArray } from '@tanstack/react-form'
 import { RadarIcon } from 'lucide-react'
 import { type ReactElement } from 'react'
 
@@ -7,6 +8,8 @@ import { Radar } from './radar'
 interface RadarsProps {
   className?: string
 }
+
+const RADAR_SIZES = [0.25, 0.5, 1, 2, 5, 8, 10, 12, 15]
 
 const Radars = ({ className }: RadarsProps): ReactElement => {
   return (
@@ -19,15 +22,7 @@ const Radars = ({ className }: RadarsProps): ReactElement => {
         </div>
       </div>
       <QuestionSelection>
-        <Radar size={0.25} />
-        <Radar size={0.5} />
-        <Radar size={1} />
-        <Radar size={2} />
-        <Radar size={5} />
-        <Radar size={8} />
-        <Radar size={10} />
-        <Radar size={12} />
-        <Radar size={15} />
+        {isNonEmptyArray(RADAR_SIZES) ? RADAR_SIZES.map((size) => <Radar key={size} size={size} />) : undefined}
       </QuestionSelection>
     </div>
   )

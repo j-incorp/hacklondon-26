@@ -1,9 +1,26 @@
+import { Ghost } from 'lucide-react'
 import type { ReactElement } from 'react'
 
-import { Card } from '../card'
+import { Button } from '@/ui/button'
 
-const Curse = (): ReactElement => {
-  return <Card cardType="curse"></Card>
+import type { Curse as CurseType } from '../types'
+
+interface CurseProps {
+  card: CurseType
+}
+
+const Curse = ({ card }: CurseProps): ReactElement => {
+  return (
+    <Button
+      className="flex flex-col w-24 h-40 items-center justify-center rounded-md border-2 border-purple-700 bg-transparent text-purple-700 px-3 py-2 text-sm font-medium hover:bg-purple-700/10 wrap-break-word whitespace-normal"
+      onClick={() => {
+        void 1
+      }}
+    >
+      <Ghost className="size-6" />
+      {card.title}
+    </Button>
+  )
 }
 
 export { Curse }
