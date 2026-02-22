@@ -40,6 +40,7 @@ func Start() {
 	r.POST("/lobby/:code/start", server.StartGame)
 	r.GET("/lobby/:code/reconnect", server.Reconnect)
 	r.POST("/upload", server.GetPresignedURL)
+	r.POST("/lobby/:code/end", server.EndGame)
 
 	if err := r.Run(":8080"); err != nil {
 		slog.Error("server exited", "error", err)

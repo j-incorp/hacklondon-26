@@ -107,3 +107,21 @@ func (l *Lobby) ReconnectPlayer(id string, wsConn *websocket.Conn) error {
 	}
 	return ErrPlayerNotFound
 }
+
+func (l *Lobby) EndGame() time.Duration {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	slog.Info("Lobby is ending game")
+	l.changeGameStateLocked(Finished)
+	// Close all player connections
+	for _, p := range l.players {
+		p.Disconnect()
+	}
+	// Signal done for cleanup
+	select {
+	case <-l.done:
+	default:
+		close(l.done)
+	}
+	return time.Since(l.seekingBegan)
+}

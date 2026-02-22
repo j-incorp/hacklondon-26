@@ -106,17 +106,6 @@ func (q IncomingQuestionRequest) Ask(lobby *Lobby, asker *Player, answerer *Play
 		}
 		// Handle matching response automatically
 		var hit bool
-		switch matchingQ.MatchingType {
-		case MatchingTypeNearestTubeLine:
-			hit = false
-		case MatchingTypeNearestHospital:
-			hit = false
-		case MatchingTypeNearestAirport:
-			hit = false
-		default:
-			slog.Warn("Received unknown matching question type", "matchingType", matchingQ.MatchingType, "askerId", asker.Id)
-			return errors.New("unknown matching question type")
-		}
 		resp, _ := json.Marshal(OutgoingMessage{Type: MessageTypePlayerAction, Data: OutgoingPlayerActionMessage{Action: PlayerActionAnswerQuestion, Data: OutgoingQuestionResponse{Type: QuestionTypeMatching, Data: MatchingResponse{MatchingType: matchingQ.MatchingType, Hit: hit}}}})
 		err = lobby.sendToPlayer(answerer.Id, resp)
 	default:
